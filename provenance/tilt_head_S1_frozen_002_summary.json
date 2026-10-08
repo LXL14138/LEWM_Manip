@@ -1,0 +1,73 @@
+{
+  "status": "complete",
+  "tool": "bind_frozen_tilt_head",
+  "tool_version": 1,
+  "kind": "frozen_real_latent_head",
+  "tilt_head": {
+    "path": "<project>/runs/tilt_head_S1_frozen_002/tilt_head.pt",
+    "sha256": "2ce0e4da4da19420a72077287cb0aa75c556cee54327758748c43d2c8e9c57b6",
+    "format": "lewm_tilt_head_v1",
+    "outputs": [
+      "tilt_deg / 30",
+      "unsafe_logit"
+    ],
+    "planner_use": "row 0 (tilt/30)"
+  },
+  "export": {
+    "directory": "<project>/runs/tilt_head_S1_frozen_002/tilt_head_as_classifier",
+    "checkpoint_sha256": "9dea73096869a4eb62a0301a39d62a3469a08a7aa5636cadf8cdbe98a0b33d2f",
+    "threshold": 0.9608285427093506
+  },
+  "threshold": 0.9608285427093506,
+  "export_recall": 0.95,
+  "threshold_note": "sigmoid(unsafe logit) of head(z_t) on the REAL float32 latents of every wm_train_bench_001 bench_dev frame (k = 0, perception, no rollout); 95% recall; finetune_tilt chose B's threshold on PREDICTED latents head(p_k) at k = 3 on bench_dev windows, so the two thresholds are not comparable; never chosen on wm_bench_001",
+  "dev_at_threshold": {
+    "frames": 139179,
+    "unsafe_frames": 25395,
+    "unsafe_recall": 0.9500295333727111,
+    "false_alarm_rate": 0.0054752865077691065,
+    "unsafe_precision": 0.9748272657481111,
+    "confusion_rows_true_cols_pred_safe_unsafe": [
+      [
+        113161,
+        623
+      ],
+      [
+        1269,
+        24126
+      ]
+    ]
+  },
+  "bench_dev": {
+    "episodes": 480,
+    "frames": 139179,
+    "unsafe_frames": 25395,
+    "frames_ge15": 35882,
+    "frames_ge30": 25395
+  },
+  "real_latent_tilt_row": {
+    "frames": 139179,
+    "mae_deg_all": 1.999354984214286,
+    "mae_deg_true_ge15": 6.043351996172801,
+    "line_22": {
+      "true_over_line": 30346,
+      "predicted_over_line": 29650,
+      "recall": 0.9487906149080604,
+      "false_alarm_rate": 0.0078836382347266,
+      "precision": 0.9710623946037099
+    }
+  },
+  "roundtrip_max_abs": 0.0,
+  "wm_checkpoint_sha256": "bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e",
+  "encoder_digest": "f295473cc367863373dcd5e07f12885312cd0487a4846bc9ad48dd6563554210",
+  "source_head": {
+    "path": "<project>/runs/compare_wm_physical_s1_001/tilt_s1/heads/tilt_L0_seed0.pt",
+    "sha256": "92b98c9a7b177f07729f3872e2d7630277f247a9537da3056b5021be273a3d1e"
+  },
+  "loss": "L0",
+  "seed": 0,
+  "selected_epoch": 27,
+  "elapsed_seconds": 11.83336646699999,
+  "test_used": false,
+  "world_model_updated": false
+}

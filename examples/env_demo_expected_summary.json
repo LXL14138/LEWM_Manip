@@ -1,0 +1,313 @@
+{
+  "steps": 162,
+  "control_dt": 0.05,
+  "phase_bounds": {
+    "SETTLE": [
+      0,
+      20
+    ],
+    "APPROACH": [
+      20,
+      42
+    ],
+    "DESCEND": [
+      42,
+      87
+    ],
+    "CLOSE": [
+      87,
+      94
+    ],
+    "LIFT": [
+      94,
+      114
+    ],
+    "PUSH": [
+      114,
+      142
+    ],
+    "HOLD": [
+      142,
+      162
+    ]
+  },
+  "max_true_tilt_deg": 35.403385228699634,
+  "true_first_step_over": {
+    "15.0": 134,
+    "22.0": 138,
+    "30.0": 142
+  },
+  "contact_free_prefix_frames": 123,
+  "horizons": [
+    1,
+    5,
+    10,
+    20
+  ],
+  "head_unsafe_threshold": 0.9608285427093506,
+  "gl_backend": "egl",
+  "scene": {
+    "control_dt": 0.05,
+    "camera_fovy_deg": 48.0,
+    "camera_pos_m": [
+      0.70125,
+      0.0,
+      0.324
+    ],
+    "pillar_size_m": [
+      0.04,
+      0.04,
+      0.1
+    ],
+    "pillar_mass_kg": 0.19840000000000002,
+    "pillar_friction": [
+      1.0,
+      0.005,
+      0.0001
+    ],
+    "shadows": false,
+    "unsafe_tilt_deg": 30.0,
+    "physics_timestep": 0.002,
+    "mujoco": "3.11.0"
+  },
+  "mae_deg": {
+    "0": 0.8676412628715312,
+    "1": 0.8297908254699436,
+    "5": 0.593259761075655,
+    "10": 1.1828804360661305,
+    "20": 2.1734124081819055
+  },
+  "mae_deg_true_in_band_15_30": {
+    "0": 3.0219106440852115,
+    "1": 2.5523754124949405,
+    "5": 2.6838341442844453,
+    "10": 2.9845944193004468,
+    "20": 6.328925075200651
+  },
+  "mae_deg_truth_growing": {
+    "0": null,
+    "1": 2.6006987578368297,
+    "5": 1.5201023821312876,
+    "10": 3.726817393729695,
+    "20": 7.011494706213279
+  },
+  "alarms": {
+    "1": {
+      "first_t_pred_ge_22": 136,
+      "first_t_pred_ge_stop": 140,
+      "first_t_unsafe_prob_ge_threshold": 143,
+      "lead_steps_22_vs_true_stop": 6,
+      "lead_seconds": 0.30000000000000004
+    },
+    "5": {
+      "first_t_pred_ge_22": 135,
+      "first_t_pred_ge_stop": 138,
+      "first_t_unsafe_prob_ge_threshold": null,
+      "lead_steps_22_vs_true_stop": 7,
+      "lead_seconds": 0.35000000000000003
+    },
+    "10": {
+      "first_t_pred_ge_22": 129,
+      "first_t_pred_ge_stop": 131,
+      "first_t_unsafe_prob_ge_threshold": 130,
+      "lead_steps_22_vs_true_stop": 13,
+      "lead_seconds": 0.65
+    },
+    "20": {
+      "first_t_pred_ge_22": 121,
+      "first_t_pred_ge_stop": 123,
+      "first_t_unsafe_prob_ge_threshold": 130,
+      "lead_steps_22_vs_true_stop": 21,
+      "lead_seconds": 1.05
+    }
+  },
+  "versions": {
+    "torch": "2.14.0+cu130",
+    "numpy": "2.2.6",
+    "mujoco": "3.11.0"
+  },
+  "arguments": {
+    "upstream": "lewm-train",
+    "bundle": "model_state.pt",
+    "head": "heads/tilt_head.pt",
+    "device": "cpu",
+    "threads": 2,
+    "encoder_builder": "hydra",
+    "out": "wm",
+    "horizon": 20,
+    "horizons": "1,5,10,20",
+    "stop_tilt_deg": 30.0,
+    "lift_z": 0.105,
+    "push_speed": 0.03,
+    "push_dir": "-y",
+    "hold_steps": 20,
+    "max_steps": 400,
+    "gl": null,
+    "stage": "wm",
+    "record": "record.npz",
+    "compare": null,
+    "no_gif": false,
+    "print_all": false,
+    "self_check": false,
+    "argv": [
+      "--stage",
+      "wm",
+      "--record",
+      "record.npz",
+      "--upstream",
+      "lewm-train",
+      "--out",
+      "wm"
+    ]
+  },
+  "bundle_sha256": "bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e",
+  "head_sha256": "2ce0e4da4da19420a72077287cb0aa75c556cee54327758748c43d2c8e9c57b6",
+  "sim_arguments": {
+    "upstream": null,
+    "bundle": "model_state.pt",
+    "head": "heads/tilt_head.pt",
+    "device": "cpu",
+    "threads": 2,
+    "encoder_builder": "hydra",
+    "out": "sim",
+    "horizon": 20,
+    "horizons": "1,5,10,20",
+    "stop_tilt_deg": 30.0,
+    "lift_z": 0.105,
+    "push_speed": 0.03,
+    "push_dir": "-y",
+    "hold_steps": 20,
+    "max_steps": 400,
+    "gl": null,
+    "stage": "sim",
+    "record": null,
+    "compare": "examples/env_demo_reference.npz",
+    "no_gif": false,
+    "print_all": false,
+    "self_check": false,
+    "argv": [
+      "--stage",
+      "sim",
+      "--out",
+      "sim",
+      "--compare",
+      "examples/env_demo_reference.npz"
+    ]
+  },
+  "sha256_raw_actions": "c363fd06d37cfe89ff5171b1215f2b3653b16745a8180df580ed79d8bdd60a6f",
+  "sha256_tilt_deg": "1afadda1e73c5e1d6303e472511c5a91f02d93677e172c1a4d37c1aacd16f072",
+  "long_rollout_from_step": 114,
+  "k0_mae_true_le_30": 0.6014343317266715,
+  "false_alarm_check": {
+    "contact_free_frames": 123,
+    "max_pred_tilt_deg": 0.8487691879272461,
+    "max_unsafe_prob": 4.693687927215251e-08
+  },
+  "fallen_tail": {
+    "frames": 0,
+    "max_head_on_real_latents_deg": null,
+    "note": "the head is calibrated for 0-30 deg; a pillar lying flat (90 deg) is outside its range"
+  },
+  "long_rollout_tilt_deg": [
+    0.0,
+    -0.52,
+    -0.97,
+    -0.39,
+    -0.61,
+    -0.72,
+    -0.41,
+    -0.13,
+    0.09,
+    0.42,
+    0.64,
+    0.99,
+    3.16,
+    4.35,
+    4.16,
+    4.6,
+    6.53,
+    9.09,
+    11.26,
+    10.57,
+    8.02,
+    5.68,
+    4.61,
+    4.88,
+    4.65,
+    4.52,
+    5.13,
+    5.51,
+    5.71,
+    5.73,
+    5.66,
+    5.55,
+    5.42,
+    5.3,
+    5.2,
+    5.08,
+    4.93,
+    4.8,
+    4.69,
+    4.59,
+    4.44,
+    4.31,
+    4.16,
+    4.05,
+    4.08,
+    4.1,
+    4.13,
+    4.16
+  ],
+  "long_rollout_true_tilt_deg": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.98,
+    2.56,
+    4.17,
+    5.8,
+    7.03,
+    8.48,
+    9.73,
+    10.81,
+    11.84,
+    13.11,
+    14.43,
+    15.83,
+    17.3,
+    18.88,
+    20.55,
+    22.34,
+    24.25,
+    26.25,
+    28.33,
+    30.55,
+    32.58,
+    33.57,
+    34.09,
+    34.41,
+    34.61,
+    34.75,
+    34.85,
+    34.93,
+    34.99,
+    35.04,
+    35.09,
+    35.14,
+    35.18,
+    35.22,
+    35.25,
+    35.28,
+    35.31,
+    35.34,
+    35.37,
+    35.4
+  ],
+  "verdict": "DEMO OK: truth crossed 30 deg at step 142; the k=10 prediction reached 22 deg at step 129 (0.65 s ahead); no false alarm over the 123 contact-free frames (max predicted tilt 0.85 deg); head MAE on real latents 0.60 deg; MAE at k=10: 1.18 deg",
+  "runtime_s": 19.0
+}

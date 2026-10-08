@@ -1,0 +1,591 @@
+{
+  "kind": "scratch_train",
+  "config": {
+    "seed": 20260921,
+    "image_size": 224,
+    "history_size": 3,
+    "embed_dim": 192,
+    "action_dim": 4,
+    "batch_size": 128,
+    "num_workers": 16,
+    "val_num_workers": 4,
+    "prefetch_factor": 2,
+    "train_window_stride": 1,
+    "val_window_stride": 3,
+    "require_full_cache": true,
+    "finite_check_mode": "combined",
+    "learning_rate": 5e-05,
+    "weight_decay": 0.001,
+    "warmup_steps": 1000,
+    "min_lr_ratio": 0.1,
+    "max_epochs": 10,
+    "max_steps": -1,
+    "val_check_interval": 1.0,
+    "limit_val_batches": null,
+    "precision": "bf16-mixed",
+    "gradient_clip_val": 1.0,
+    "sigreg_weight": 0.09,
+    "sigreg_knots": 17,
+    "sigreg_num_proj": 1024,
+    "scratch": {
+      "objective": "train.forward_objective: (1 - sigreg_weight) * MSE(predict(z[:3], a[:3]), z[1:4]) + sigreg_weight * SIGReg(z); target attached; no tilt head, no multi-step loss",
+      "base_run": "runs/lewm_full_3epochs_002",
+      "base_ratio": 0.08523859398244682,
+      "train_sources": [
+        {
+          "cache": "<cluster>/lewm-manip/data/wm_full_001",
+          "index_sha256": "25ada0a303fcdbe08b04ae236a4a5d1baef389aa35734d45304171807833c786",
+          "role": "primary",
+          "rows": "train",
+          "stride": 1,
+          "weight": 1.0,
+          "cache_id": 0
+        },
+        {
+          "cache": "<cluster>/lewm-manip/data/wm_train_bench_001",
+          "index_sha256": "b313c8087f2896207cac4a30d4c5ecb58ffc15888d8523334797e630cc6503c3",
+          "role": "bench",
+          "rows": "bench_test",
+          "stride": 1,
+          "weight": 1.0,
+          "cache_id": 1
+        },
+        {
+          "cache": "<cluster>/lewm-manip/data/wm_rrt_branches_001",
+          "index_sha256": "a8786fec8e24a7a091026dbe7c469e66a7aba9006c858f513f509121142e7d03",
+          "role": "extra",
+          "rows": "all",
+          "stride": 1,
+          "weight": 1.0,
+          "cache_id": 2
+        },
+        {
+          "cache": "<cluster>/lewm-manip/data/wm_cf_branches_001",
+          "index_sha256": "dfb68d17806e305703473fce035ce4dabc1a76cd68b5f36bfafef40a894d9a7d",
+          "role": "extra",
+          "rows": "all",
+          "stride": 1,
+          "weight": 1.0,
+          "cache_id": 3
+        }
+      ],
+      "extra_validation": [
+        {
+          "name": "bench",
+          "cache": "<cluster>/lewm-manip/data/wm_train_bench_001",
+          "index_sha256": "b313c8087f2896207cac4a30d4c5ecb58ffc15888d8523334797e630cc6503c3",
+          "rows": "bench_dev",
+          "stride": 3
+        },
+        {
+          "name": "rrt_dev",
+          "cache": "<cluster>/lewm-manip/data/wm_rrt_dev_001",
+          "index_sha256": "811efd10ca0b9203e2ce99dd5cc16ae9367c235fcacb1191c010eb6c6757e02a",
+          "rows": "bench_dev",
+          "stride": 3
+        },
+        {
+          "name": "cf_dev",
+          "cache": "<cluster>/lewm-manip/data/wm_cf_dev_001",
+          "index_sha256": "e4aef2b39e0185a88e42e614d16ffec5d1345c3f65eab6c657f4092a1b433a52",
+          "rows": "bench_dev",
+          "stride": 3
+        }
+      ],
+      "predictor_override": null,
+      "holdout_cache": null
+    }
+  },
+  "training_budget": {
+    "mode": "epochs",
+    "max_epochs": 10,
+    "max_steps": -1,
+    "batches_per_epoch": 36285,
+    "planned_optimizer_steps": 362850,
+    "train_windows": 4644551,
+    "dropped_windows_per_epoch": 71,
+    "val_check_interval": 1.0
+  },
+  "validation": {
+    "sampling": "all_stride_windows",
+    "window_stride": 3,
+    "pool_windows": 35961,
+    "evaluated_windows": 35961,
+    "batches": 281,
+    "test_used": false,
+    "base_comparable": true,
+    "base_comparable_reasons": [],
+    "ratio_definition": "ratio = val_pred_loss / val_persistence_mse over --cache VAL rows; ratio_to_base = ratio / 0.08523859398244682 (the base run's final ratio), only when base_comparable",
+    "extra_validation": {
+      "bench": {
+        "windows": 46065,
+        "episodes": 480,
+        "stride": 3,
+        "rows": "bench_dev",
+        "cache": "<cluster>/lewm-manip/data/wm_train_bench_001",
+        "upstream_held_out": {
+          "checked": false,
+          "rows": 480,
+          "reason": "the index records no upstream episode for these rows (no upstream_npz_sha256, no episode_sources.upstream_source); only the source_npz_sha256 overlap with training rows is checked"
+        }
+      },
+      "rrt_dev": {
+        "windows": 24420,
+        "episodes": 2220,
+        "stride": 3,
+        "rows": "bench_dev",
+        "cache": "<cluster>/lewm-manip/data/wm_rrt_dev_001",
+        "upstream_held_out": {
+          "checked": true,
+          "method": "upstream_npz_sha256",
+          "rows": 2220,
+          "trained_or_test_upstream": 0
+        }
+      },
+      "cf_dev": {
+        "windows": 37800,
+        "episodes": 540,
+        "stride": 3,
+        "rows": "bench_dev",
+        "cache": "<cluster>/lewm-manip/data/wm_cf_dev_001",
+        "upstream_held_out": {
+          "checked": true,
+          "method": "episode_sources.upstream_source -> bench episode_sources",
+          "rows": 540,
+          "from_trained_bench_rows": 0,
+          "unmapped_rows": 0
+        }
+      }
+    }
+  },
+  "dataloaders": {
+    "train": {
+      "batch_size": 128,
+      "num_workers": 16,
+      "pin_memory": true,
+      "persistent_workers": true,
+      "prefetch_factor": 2,
+      "multiprocessing_context": "spawn"
+    },
+    "val": {
+      "batch_size": 128,
+      "num_workers": 4,
+      "pin_memory": true,
+      "persistent_workers": true,
+      "prefetch_factor": 2,
+      "multiprocessing_context": "spawn"
+    },
+    "total_worker_processes_if_both_active": 20
+  },
+  "cache": "<cluster>/lewm-manip/data/wm_full_001",
+  "cache_index_sha256": "25ada0a303fcdbe08b04ae236a4a5d1baef389aa35734d45304171807833c786",
+  "lewm_repo": "<cluster>/lewm-train",
+  "upstream_sha256": {
+    "jepa.py": "41bad7fd21e0f14aea4c9c3d39a9c87037e787746d953ab62cdc0677e938ce96",
+    "module.py": "0b258a9e8dc24c29fcb1e8c50a09ec78b8ea85aeb79e21dd8adf712396646620",
+    "config/train/model/lewm.yaml": "7be97eaa2c83f809b9ea7a6da5a7d3f3c70502c27537383f54db32335e21e42b"
+  },
+  "adapter_sha256": {
+    "train.py": "93563743eacb24c05d41ae250646b6a8f3a94da5e0d4574f47ae71930ac62706",
+    "numerics.py": "4c50a0a95540f2e9206555b12012c62ef064c1911dffd793e2d1cedc3e0ddb8d",
+    "dataset.py": "0fbc74905066d964f4806e11c023062aa80e78e5b5f49bdf9d171147a29695cc",
+    "train_scratch.py": "76bc3b35ee56b2569ad3e7170a3aa160fabd3e416a416daba2b6ba30f31e64a9",
+    "finetune_dataset.py": "a0b6a4c765a1aaf4ec74d7816d3b309fee7fc1851af398f07a9ac7719b21236e",
+    "finetune_tilt.py": "9ecc5c95e6d592edaa312150cfb92a52cd9dae7555ceb8bbf699ab46bedf0906",
+    "eval_cache.py": "c632caf72df3e23bba2c33de2e05524d7cfb90f6cfdb2d20f9d0b676fd4a927b",
+    "prepare_data.py": "c9345fe631ee0adeb166b94413e4b8b9d8f0b511c3b31607f75f8ebef009f2db",
+    "decoder.py": "f0d64c06d920a0fb7c243bc240c93c18b199a159b0e426f085c0ad1dcbc380b2",
+    "evaluate_short.py": "75d42c28c7c2572c33cff906a0fab5d5392b2f990642026d10e8c2118a96267a"
+  },
+  "model_config": {
+    "_target_": "jepa.JEPA",
+    "encoder": {
+      "_target_": "stable_pretraining.backbone.utils.vit_hf",
+      "size": "tiny",
+      "patch_size": 14,
+      "image_size": 224,
+      "pretrained": false,
+      "use_mask_token": false
+    },
+    "predictor": {
+      "_target_": "module.ARPredictor",
+      "num_frames": 3,
+      "input_dim": 192,
+      "hidden_dim": 192,
+      "output_dim": 192,
+      "depth": 6,
+      "heads": 16,
+      "mlp_dim": 2048,
+      "dim_head": 64,
+      "dropout": 0.1,
+      "emb_dropout": 0.0
+    },
+    "action_encoder": {
+      "_target_": "module.Embedder",
+      "input_dim": 4,
+      "emb_dim": 192
+    },
+    "projector": {
+      "_target_": "module.MLP",
+      "input_dim": 192,
+      "output_dim": 192,
+      "hidden_dim": 2048,
+      "norm_fn": {
+        "_target_": "torch.nn.BatchNorm1d",
+        "_partial_": true
+      }
+    },
+    "pred_proj": {
+      "_target_": "module.MLP",
+      "input_dim": 192,
+      "output_dim": 192,
+      "hidden_dim": 2048,
+      "norm_fn": {
+        "_target_": "torch.nn.BatchNorm1d",
+        "_partial_": true
+      }
+    }
+  },
+  "predictor_override": null,
+  "model_parameters": {
+    "total": 18034418,
+    "predictor": 10791360
+  },
+  "train_windows": 4644551,
+  "val_windows": 35961,
+  "evaluated_val_window_indices": null,
+  "train_sources": [
+    {
+      "cache": "<cluster>/lewm-manip/data/wm_full_001",
+      "index_sha256": "25ada0a303fcdbe08b04ae236a4a5d1baef389aa35734d45304171807833c786",
+      "role": "primary",
+      "cache_id": 0,
+      "split": "train",
+      "rows": "train",
+      "episodes": 4500,
+      "skipped_short_episodes": [],
+      "windows": 1983477,
+      "stride": 1,
+      "weight": 1.0,
+      "natural_share": 0.4270546281007572,
+      "sampling_share": 0.4270546281007572
+    },
+    {
+      "cache": "<cluster>/lewm-manip/data/wm_train_bench_001",
+      "index_sha256": "b313c8087f2896207cac4a30d4c5ecb58ffc15888d8523334797e630cc6503c3",
+      "role": "bench",
+      "cache_id": 1,
+      "split": "val",
+      "rows": "bench_test",
+      "episodes": 961,
+      "skipped_short_episodes": [],
+      "windows": 277426,
+      "stride": 1,
+      "weight": 1.0,
+      "natural_share": 0.05973150041844734,
+      "sampling_share": 0.05973150041844734,
+      "guard": {
+        "name_check": {
+          "source_roots": [
+            "<project>/data/danger_train_001",
+            "<project>/data/danger_train_002"
+          ],
+          "split_file": "<project>/data/danger_train_split_001/benchmark_split.json",
+          "refused_root_basename_prefix": "danger_bench",
+          "refused_split_component_prefix": "danger_bench_split",
+          "passed": true
+        },
+        "holdout_cache_source": "overlap check disabled by --holdout-cache none",
+        "holdout_cache": null,
+        "overlap": null
+      }
+    },
+    {
+      "cache": "<cluster>/lewm-manip/data/wm_rrt_branches_001",
+      "index_sha256": "a8786fec8e24a7a091026dbe7c469e66a7aba9006c858f513f509121142e7d03",
+      "role": "extra",
+      "cache_id": 2,
+      "split": "val",
+      "rows": "all",
+      "episodes": 39389,
+      "skipped_short_episodes": [],
+      "windows": 1260448,
+      "stride": 1,
+      "weight": 1.0,
+      "natural_share": 0.2713820991523185,
+      "sampling_share": 0.2713820991523185,
+      "guard": {
+        "name_check": {
+          "source_roots": [
+            "<project>/data/rrt_branches_001"
+          ],
+          "split_file": null,
+          "refused_root_basename_prefix": "danger_bench",
+          "refused_split_component_prefix": "danger_bench_split",
+          "passed": true
+        },
+        "holdout_cache_source": "overlap check disabled by --holdout-cache none",
+        "holdout_cache": null,
+        "overlap": null,
+        "shared_with_bench_or_other_extra": 0,
+        "upstream": {
+          "provenance_source": "index",
+          "upstream_source_roots": [
+            "<project>/data/danger_train_001",
+            "<project>/data/danger_train_002",
+            "<project>/data/exploration_5000_001"
+          ],
+          "upstream_split_files": [
+            "<project>/data/danger_train_split_001/benchmark_split.json"
+          ],
+          "job_parts": {},
+          "rows_by_source_part": {
+            "test": 39389,
+            "dev": 0,
+            "not_a_branch": 0,
+            "branch_part_unknown": 0
+          },
+          "dev_part_rows": 0,
+          "dev_part_rows_held_out": false,
+          "role": "train",
+          "passed": true
+        },
+        "upstream_rows": {
+          "checked": true,
+          "method": "upstream_npz_sha256 (index only)",
+          "rows": 39389,
+          "from_allowed_training_episodes": 39389,
+          "forbidden_hits": {
+            "--cache val": 0,
+            "--cache test": 0,
+            "bench cache rows not trained on (bench_dev)": 0
+          }
+        }
+      }
+    },
+    {
+      "cache": "<cluster>/lewm-manip/data/wm_cf_branches_001",
+      "index_sha256": "dfb68d17806e305703473fce035ce4dabc1a76cd68b5f36bfafef40a894d9a7d",
+      "role": "extra",
+      "cache_id": 3,
+      "split": "val",
+      "rows": "all",
+      "episodes": 5400,
+      "skipped_short_episodes": [],
+      "windows": 1123200,
+      "stride": 1,
+      "weight": 1.0,
+      "natural_share": 0.24183177232847697,
+      "sampling_share": 0.24183177232847697,
+      "guard": {
+        "name_check": {
+          "source_roots": [
+            "<project>/data/danger_cf_branches_001"
+          ],
+          "split_file": "<project>/data/danger_cf_branches_split_001/benchmark_split.json",
+          "refused_root_basename_prefix": "danger_bench",
+          "refused_split_component_prefix": "danger_bench_split",
+          "passed": true
+        },
+        "holdout_cache_source": "overlap check disabled by --holdout-cache none",
+        "holdout_cache": null,
+        "overlap": null,
+        "shared_with_bench_or_other_extra": 0,
+        "upstream": {
+          "provenance_source": "index",
+          "upstream_source_roots": [
+            "<project>/data/danger_train_001",
+            "<project>/data/danger_train_002"
+          ],
+          "upstream_split_files": [
+            "<project>/data/danger_train_split_001/benchmark_split.json"
+          ],
+          "job_parts": {},
+          "rows_by_source_part": {
+            "test": 5400,
+            "dev": 0,
+            "not_a_branch": 0,
+            "branch_part_unknown": 0
+          },
+          "dev_part_rows": 0,
+          "dev_part_rows_held_out": false,
+          "role": "train",
+          "passed": true
+        },
+        "upstream_rows": {
+          "checked": true,
+          "method": "episode_sources.upstream_source -> bench episode_sources (index only)",
+          "rows": 5400,
+          "upstream_counts": {
+            "trained_bench_rows": 5400,
+            "untrained_bench_rows": 0,
+            "unmatched": 0,
+            "no_upstream_source": 0,
+            "bad_upstream_dataset": 0
+          }
+        }
+      }
+    }
+  ],
+  "mixed_windows": {
+    "sources": [
+      {
+        "cache": "<cluster>/lewm-manip/data/wm_full_001",
+        "index_sha256": "25ada0a303fcdbe08b04ae236a4a5d1baef389aa35734d45304171807833c786",
+        "split": "train",
+        "cache_id": 0,
+        "episodes": 4500,
+        "restricted_to_episode_ids": null,
+        "skipped_short_episodes": [],
+        "windows": 1983477,
+        "stride": 1,
+        "step": 1,
+        "horizon": 1,
+        "frames_per_window": 4,
+        "actions_per_window": 3,
+        "labels": {
+          "frames": 1996977,
+          "unsafe_frames": 23005
+        },
+        "macro_normalization": null,
+        "extra_labels": [],
+        "anchored": false
+      },
+      {
+        "cache": "<cluster>/lewm-manip/data/wm_train_bench_001",
+        "index_sha256": "b313c8087f2896207cac4a30d4c5ecb58ffc15888d8523334797e630cc6503c3",
+        "split": "val",
+        "cache_id": 1,
+        "episodes": 961,
+        "restricted_to_episode_ids": 961,
+        "skipped_short_episodes": [],
+        "windows": 277426,
+        "stride": 1,
+        "step": 1,
+        "horizon": 1,
+        "frames_per_window": 4,
+        "actions_per_window": 3,
+        "labels": {
+          "frames": 280309,
+          "unsafe_frames": 49841
+        },
+        "macro_normalization": null,
+        "extra_labels": [],
+        "anchored": false
+      },
+      {
+        "cache": "<cluster>/lewm-manip/data/wm_rrt_branches_001",
+        "index_sha256": "a8786fec8e24a7a091026dbe7c469e66a7aba9006c858f513f509121142e7d03",
+        "split": "val",
+        "cache_id": 2,
+        "episodes": 39389,
+        "restricted_to_episode_ids": null,
+        "skipped_short_episodes": [],
+        "windows": 1260448,
+        "stride": 1,
+        "step": 1,
+        "horizon": 1,
+        "frames_per_window": 4,
+        "actions_per_window": 3,
+        "labels": {
+          "frames": 1378615,
+          "unsafe_frames": 77742
+        },
+        "macro_normalization": null,
+        "extra_labels": [],
+        "anchored": false
+      },
+      {
+        "cache": "<cluster>/lewm-manip/data/wm_cf_branches_001",
+        "index_sha256": "dfb68d17806e305703473fce035ce4dabc1a76cd68b5f36bfafef40a894d9a7d",
+        "split": "val",
+        "cache_id": 3,
+        "episodes": 5400,
+        "restricted_to_episode_ids": null,
+        "skipped_short_episodes": [],
+        "windows": 1123200,
+        "stride": 1,
+        "step": 1,
+        "horizon": 1,
+        "frames_per_window": 4,
+        "actions_per_window": 3,
+        "labels": {
+          "frames": 1139400,
+          "unsafe_frames": 408527
+        },
+        "macro_normalization": null,
+        "extra_labels": [],
+        "anchored": false
+      }
+    ],
+    "total_windows": 4644551,
+    "bench_window_fraction": 0.05973150041844734,
+    "extra_windows": 2383648,
+    "extra_window_fraction": 0.5132138714807954
+  },
+  "sampler": {
+    "kind": "shuffle",
+    "note": "train.build_data_loaders: uniform without replacement, seeded generator (base)"
+  },
+  "guards": {
+    "holdout_cache": null,
+    "holdout_note": "overlap check disabled by --holdout-cache none",
+    "contract": {
+      "check_eval_cache": "ok",
+      "normalization_reference": "25ada0a303fcdbe08b04ae236a4a5d1baef389aa35734d45304171807833c786",
+      "shared_with_cache_splits": 0,
+      "shared_between_sources": 0,
+      "sources_checked": 3
+    }
+  },
+  "normalization": {
+    "fit_split": "train",
+    "num_actions": 1992477,
+    "names": [
+      "dx",
+      "dy",
+      "dz",
+      "dgripper"
+    ],
+    "mean": [
+      0.040703438085425696,
+      -0.012399661743676687,
+      0.05471802006470693,
+      0.3239098870401013
+    ],
+    "std": [
+      0.050561455154413196,
+      0.047370118599586605,
+      0.07757630042049778,
+      0.9460881747008939
+    ],
+    "scale": [
+      0.050561455154413196,
+      0.047370118599586605,
+      0.07757630042049778,
+      0.9460881747008939
+    ],
+    "constant_channels": []
+  },
+  "base_reference": {
+    "run": "runs/lewm_full_3epochs_002",
+    "ratio": 0.08523859398244682,
+    "base_comparable": true,
+    "note": "the base ratio is the base run's FINAL ratio, reached with the learning rate annealed to min_lr_ratio. With max_epochs 10 the cosine horizon is longer, so epoch 1-3 numbers run at roughly 0.8-1.0x peak LR (lr_multiplier in each per-epoch record) and are not a replay of the base curve; only the final (annealed) ratio is comparable to it"
+  },
+  "lightning_environment": "SLURMEnvironment(auto_requeue=False)",
+  "never_resumed": true,
+  "signals": "SIGTERM/SIGUSR1 -> TrainingSignal -> FAILED.json, exit 128+N (first signal only)",
+  "versions": {
+    "torch": "2.14.0",
+    "torchvision": "0.29.0",
+    "lightning": "2.6.6",
+    "stable-pretraining": "0.1.8",
+    "stable-worldmodel": "0.1.1",
+    "transformers": "5.17.0",
+    "h5py": "3.16.0",
+    "pillow": "12.3.0"
+  },
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "external_logging": false
+}

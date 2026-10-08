@@ -1,0 +1,699 @@
+{
+  "status": "complete",
+  "kind": "scratch_train",
+  "global_step": 362850,
+  "training_budget": {
+    "mode": "epochs",
+    "max_epochs": 10,
+    "max_steps": -1,
+    "batches_per_epoch": 36285,
+    "planned_optimizer_steps": 362850,
+    "train_windows": 4644551,
+    "dropped_windows_per_epoch": 71,
+    "val_check_interval": 1.0
+  },
+  "validation": {
+    "sampling": "all_stride_windows",
+    "window_stride": 3,
+    "pool_windows": 35961,
+    "evaluated_windows": 35961,
+    "batches": 281,
+    "test_used": false,
+    "base_comparable": true,
+    "base_comparable_reasons": [],
+    "ratio_definition": "ratio = val_pred_loss / val_persistence_mse over --cache VAL rows; ratio_to_base = ratio / 0.08523859398244682 (the base run's final ratio), only when base_comparable",
+    "extra_validation": {
+      "bench": {
+        "windows": 46065,
+        "episodes": 480,
+        "stride": 3,
+        "rows": "bench_dev",
+        "cache": "<cluster>/lewm-manip/data/wm_train_bench_001",
+        "upstream_held_out": {
+          "checked": false,
+          "rows": 480,
+          "reason": "the index records no upstream episode for these rows (no upstream_npz_sha256, no episode_sources.upstream_source); only the source_npz_sha256 overlap with training rows is checked"
+        }
+      },
+      "rrt_dev": {
+        "windows": 24420,
+        "episodes": 2220,
+        "stride": 3,
+        "rows": "bench_dev",
+        "cache": "<cluster>/lewm-manip/data/wm_rrt_dev_001",
+        "upstream_held_out": {
+          "checked": true,
+          "method": "upstream_npz_sha256",
+          "rows": 2220,
+          "trained_or_test_upstream": 0
+        }
+      },
+      "cf_dev": {
+        "windows": 37800,
+        "episodes": 540,
+        "stride": 3,
+        "rows": "bench_dev",
+        "cache": "<cluster>/lewm-manip/data/wm_cf_dev_001",
+        "upstream_held_out": {
+          "checked": true,
+          "method": "episode_sources.upstream_source -> bench episode_sources",
+          "rows": 540,
+          "from_trained_bench_rows": 0,
+          "unmapped_rows": 0
+        }
+      }
+    }
+  },
+  "metrics_scope": "all validation windows at configured stride; no test evaluation",
+  "final_validation": [
+    {
+      "val_loss": 1.2392644882202148,
+      "val_pred_loss": 0.0012969528324902058,
+      "val_sigreg_loss": 13.75649356842041,
+      "val_persistence_mse": 0.021730657666921616,
+      "val_latent_std": 0.9174533486366272
+    }
+  ],
+  "final_ratios": {
+    "val_pred_loss": 0.0012969528324902058,
+    "val_persistence_mse": 0.021730657666921616,
+    "ratio": 0.05968309161965337,
+    "base_comparable": true,
+    "ratio_to_base": 0.7001885980421487,
+    "val_latent_std": 0.9174533486366272,
+    "val_sigreg_loss": 13.75649356842041,
+    "val_loss": 1.2392644882202148
+  },
+  "final_learning_rate": 5e-06,
+  "final_extra_validation": {
+    "bench": {
+      "pred_loss": 0.001148507545053327,
+      "persistence_mse": 0.01636832555810358,
+      "latent_std": 0.9294872097985617,
+      "sigreg_loss": 12.41758048097823,
+      "windows": 46065,
+      "ratio": 0.07016646516324496
+    },
+    "rrt_dev": {
+      "pred_loss": 0.001680076351224534,
+      "persistence_mse": 0.015591378995491212,
+      "latent_std": 0.79679710874784,
+      "sigreg_loss": 33.40241336994343,
+      "windows": 24420,
+      "ratio": 0.10775675145286293
+    },
+    "cf_dev": {
+      "pred_loss": 0.0006588164643414082,
+      "persistence_mse": 0.0058691022254334264,
+      "latent_std": 0.6396906274232506,
+      "sigreg_loss": 61.495926281157,
+      "windows": 37800,
+      "ratio": 0.11225165945934011
+    }
+  },
+  "per_epoch_validation": [
+    {
+      "epoch": 1,
+      "global_step": 36285,
+      "val_pred_loss": 0.0058442214503884315,
+      "val_persistence_mse": 0.03742428869009018,
+      "ratio": 0.1561611898300678,
+      "base_comparable": true,
+      "ratio_to_base": 1.8320479319758145,
+      "val_latent_std": 0.9038930535316467,
+      "val_sigreg_loss": 13.989823341369629,
+      "val_loss": 1.2644023895263672,
+      "learning_rate": 4.8952446428243685e-05,
+      "lr_multiplier": 0.9790489285648737,
+      "extra_validation": {
+        "bench": {
+          "pred_loss": 0.005026916729756978,
+          "persistence_mse": 0.02844071862160752,
+          "latent_std": 0.9158578885710487,
+          "sigreg_loss": 12.989947316442912,
+          "windows": 46065,
+          "ratio": 0.17675069313958314
+        },
+        "rrt_dev": {
+          "pred_loss": 0.005232869162636883,
+          "persistence_mse": 0.0241459228003811,
+          "latent_std": 0.8095372843605685,
+          "sigreg_loss": 30.872712979328426,
+          "windows": 24420,
+          "ratio": 0.2167185410927551
+        },
+        "cf_dev": {
+          "pred_loss": 0.003059605627503029,
+          "persistence_mse": 0.007208868463377551,
+          "latent_std": 0.5992251986763366,
+          "sigreg_loss": 64.21054208503199,
+          "windows": 37800,
+          "ratio": 0.42442245174071613
+        }
+      },
+      "snapshot": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/epochs/epoch_01",
+      "model_state_sha256": "8e87f6ad2ca6be11b54323a48dd3862446217bcf771e436660a94d3c30fba5f2"
+    },
+    {
+      "epoch": 2,
+      "global_step": 72570,
+      "val_pred_loss": 0.003867889754474163,
+      "val_persistence_mse": 0.03135957941412926,
+      "ratio": 0.12333997543128594,
+      "base_comparable": true,
+      "ratio_to_base": 1.4469968317014397,
+      "val_latent_std": 0.9097863435745239,
+      "val_sigreg_loss": 13.328704833984375,
+      "val_loss": 1.2031030654907227,
+      "learning_rate": 4.579429961604921e-05,
+      "lr_multiplier": 0.9158859923209842,
+      "extra_validation": {
+        "bench": {
+          "pred_loss": 0.0033087204415870744,
+          "persistence_mse": 0.023879825835951496,
+          "latent_std": 0.9209444675799574,
+          "sigreg_loss": 12.135143598231277,
+          "windows": 46065,
+          "ratio": 0.1385571429338374
+        },
+        "rrt_dev": {
+          "pred_loss": 0.0037081567906941623,
+          "persistence_mse": 0.02116928291610037,
+          "latent_std": 0.8085448006349544,
+          "sigreg_loss": 31.118858329904167,
+          "windows": 24420,
+          "ratio": 0.17516685876373786
+        },
+        "cf_dev": {
+          "pred_loss": 0.0020685686365203566,
+          "persistence_mse": 0.006954398137578792,
+          "latent_std": 0.620260411887947,
+          "sigreg_loss": 63.11082226142681,
+          "windows": 37800,
+          "ratio": 0.2974475426338675
+        }
+      },
+      "snapshot": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/epochs/epoch_02",
+      "model_state_sha256": "09512a88c2094943eab3ce80bac521697edab34b73906c8e9b3a53b56e6e9d65"
+    },
+    {
+      "epoch": 3,
+      "global_step": 108855,
+      "val_pred_loss": 0.003066589590162039,
+      "val_persistence_mse": 0.028216572478413582,
+      "ratio": 0.10868044276136161,
+      "base_comparable": true,
+      "ratio_to_base": 1.2750144938306018,
+      "val_latent_std": 0.9208568334579468,
+      "val_sigreg_loss": 13.071634292602539,
+      "val_loss": 1.1792376041412354,
+      "learning_rate": 4.083554984327208e-05,
+      "lr_multiplier": 0.8167109968654416,
+      "extra_validation": {
+        "bench": {
+          "pred_loss": 0.0027469502735373917,
+          "persistence_mse": 0.021873966789805712,
+          "latent_std": 0.9310773448215354,
+          "sigreg_loss": 12.309124407141473,
+          "windows": 46065,
+          "ratio": 0.12558080113834671
+        },
+        "rrt_dev": {
+          "pred_loss": 0.0032221759777412394,
+          "persistence_mse": 0.01992220469368324,
+          "latent_std": 0.8143415122223525,
+          "sigreg_loss": 31.66868471212801,
+          "windows": 24420,
+          "ratio": 0.16173792144415114
+        },
+        "cf_dev": {
+          "pred_loss": 0.0017606908253211746,
+          "persistence_mse": 0.0072257821443028145,
+          "latent_std": 0.6354745867595609,
+          "sigreg_loss": 62.153097597959814,
+          "windows": 37800,
+          "ratio": 0.24366785354986042
+        }
+      },
+      "snapshot": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/epochs/epoch_03",
+      "model_state_sha256": "f5d4602aed47035068419ae86f85cec4908513d81db1be9da99d2419489a7cea"
+    },
+    {
+      "epoch": 4,
+      "global_step": 145140,
+      "val_pred_loss": 0.0025230171158909798,
+      "val_persistence_mse": 0.02612684667110443,
+      "ratio": 0.09656799183046329,
+      "base_comparable": true,
+      "ratio_to_base": 1.1329139456517727,
+      "val_latent_std": 0.9162920117378235,
+      "val_sigreg_loss": 13.26099967956543,
+      "val_loss": 1.1957865953445435,
+      "learning_rate": 3.456425840272169e-05,
+      "lr_multiplier": 0.6912851680544337,
+      "extra_validation": {
+        "bench": {
+          "pred_loss": 0.0022496059934158695,
+          "persistence_mse": 0.01962265309614966,
+          "latent_std": 0.9269634896622255,
+          "sigreg_loss": 12.40535538388841,
+          "windows": 46065,
+          "ratio": 0.11464331466254607
+        },
+        "rrt_dev": {
+          "pred_loss": 0.0027887733571954456,
+          "persistence_mse": 0.018054446768409203,
+          "latent_std": 0.8024938979371466,
+          "sigreg_loss": 32.20857731587178,
+          "windows": 24420,
+          "ratio": 0.15446462541710812
+        },
+        "cf_dev": {
+          "pred_loss": 0.0014557950540751258,
+          "persistence_mse": 0.006499291910653839,
+          "latent_std": 0.6256018227774147,
+          "sigreg_loss": 62.84459629926732,
+          "windows": 37800,
+          "ratio": 0.22399287092933032
+        }
+      },
+      "snapshot": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/epochs/epoch_04",
+      "model_state_sha256": "93cc9a983389c5fa28f25bae65d042b92430a55fe89d8e4cfa52ebc3d0c6c17e"
+    },
+    {
+      "epoch": 5,
+      "global_step": 181425,
+      "val_pred_loss": 0.002123907208442688,
+      "val_persistence_mse": 0.02444952353835106,
+      "ratio": 0.08686906332187486,
+      "base_comparable": true,
+      "ratio_to_base": 1.019128299321359,
+      "val_latent_std": 0.921173095703125,
+      "val_sigreg_loss": 13.590407371520996,
+      "val_loss": 1.2250696420669556,
+      "learning_rate": 2.759767253378538e-05,
+      "lr_multiplier": 0.5519534506757076,
+      "extra_validation": {
+        "bench": {
+          "pred_loss": 0.0018711170570163281,
+          "persistence_mse": 0.018546014047241648,
+          "latent_std": 0.9304577385953541,
+          "sigreg_loss": 12.28871257586962,
+          "windows": 46065,
+          "ratio": 0.10089052301211968
+        },
+        "rrt_dev": {
+          "pred_loss": 0.0023552178267929567,
+          "persistence_mse": 0.01659361105290204,
+          "latent_std": 0.7999603755546338,
+          "sigreg_loss": 33.035312153959154,
+          "windows": 24420,
+          "ratio": 0.14193521948202195
+        },
+        "cf_dev": {
+          "pred_loss": 0.0011517017033990846,
+          "persistence_mse": 0.006236107573345108,
+          "latent_std": 0.6356757135493631,
+          "sigreg_loss": 62.12574226823433,
+          "windows": 37800,
+          "ratio": 0.1846827832672073
+        }
+      },
+      "snapshot": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/epochs/epoch_05",
+      "model_state_sha256": "f982fa29d664acf4bf84a45c4e03f00351570c6a51c478b1266ac11ab42fa872"
+    },
+    {
+      "epoch": 6,
+      "global_step": 217710,
+      "val_pred_loss": 0.0018123515183106065,
+      "val_persistence_mse": 0.024078277871012688,
+      "ratio": 0.07526915039436674,
+      "base_comparable": true,
+      "ratio_to_base": 0.8830407316416659,
+      "val_latent_std": 0.9197278022766113,
+      "val_sigreg_loss": 13.530762672424316,
+      "val_loss": 1.2194175720214844,
+      "learning_rate": 2.0621473317675765e-05,
+      "lr_multiplier": 0.4124294663535153,
+      "extra_validation": {
+        "bench": {
+          "pred_loss": 0.0016417769711601314,
+          "persistence_mse": 0.018378325723799837,
+          "latent_std": 0.9312568762720854,
+          "sigreg_loss": 12.22204572726678,
+          "windows": 46065,
+          "ratio": 0.08933223819371308
+        },
+        "rrt_dev": {
+          "pred_loss": 0.0021779329083512103,
+          "persistence_mse": 0.017435949545332292,
+          "latent_std": 0.8073478016279253,
+          "sigreg_loss": 33.09071755124154,
+          "windows": 24420,
+          "ratio": 0.12491048466782562
+        },
+        "cf_dev": {
+          "pred_loss": 0.0009909795142005557,
+          "persistence_mse": 0.006481924017617728,
+          "latent_std": 0.636639841238293,
+          "sigreg_loss": 61.85679295454076,
+          "windows": 37800,
+          "ratio": 0.15288354376063265
+        }
+      },
+      "snapshot": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/epochs/epoch_06",
+      "model_state_sha256": "e47c18cca5ce7ea7614ee18fe295a108577c666165b1eba68e3f21b14a464319"
+    },
+    {
+      "epoch": 7,
+      "global_step": 253995,
+      "val_pred_loss": 0.0016419320600107312,
+      "val_persistence_mse": 0.023105699568986893,
+      "ratio": 0.07106177655900009,
+      "base_comparable": true,
+      "ratio_to_base": 0.8336807687563903,
+      "val_latent_std": 0.9187674522399902,
+      "val_sigreg_loss": 13.36739730834961,
+      "val_loss": 1.204559564590454,
+      "learning_rate": 1.4322288022217936e-05,
+      "lr_multiplier": 0.2864457604443587,
+      "extra_validation": {
+        "bench": {
+          "pred_loss": 0.0014688159601415048,
+          "persistence_mse": 0.0174938080381207,
+          "latent_std": 0.9335349388856473,
+          "sigreg_loss": 12.216680312003994,
+          "windows": 46065,
+          "ratio": 0.08396204856831702
+        },
+        "rrt_dev": {
+          "pred_loss": 0.0020407458366467684,
+          "persistence_mse": 0.016324081515357886,
+          "latent_std": 0.8027231176596602,
+          "sigreg_loss": 33.02935796514288,
+          "windows": 24420,
+          "ratio": 0.1250144355580932
+        },
+        "cf_dev": {
+          "pred_loss": 0.0009034988395968285,
+          "persistence_mse": 0.0060285572703553105,
+          "latent_std": 0.6416263101336167,
+          "sigreg_loss": 61.512617044600226,
+          "windows": 37800,
+          "ratio": 0.1498698277346842
+        }
+      },
+      "snapshot": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/epochs/epoch_07",
+      "model_state_sha256": "dd0afeb17a1b7cf60242e7d733ee7325b7a6a41028277e378f72e859b96ee0df"
+    },
+    {
+      "epoch": 8,
+      "global_step": 290280,
+      "val_pred_loss": 0.0014208863722160459,
+      "val_persistence_mse": 0.022493695840239525,
+      "ratio": 0.06316820420742897,
+      "base_comparable": true,
+      "ratio_to_base": 0.7410751545296159,
+      "val_latent_std": 0.9174463748931885,
+      "val_sigreg_loss": 13.587197303771973,
+      "val_loss": 1.224141001701355,
+      "learning_rate": 9.320109318916475e-06,
+      "lr_multiplier": 0.1864021863783295,
+      "extra_validation": {
+        "bench": {
+          "pred_loss": 0.0012815965540693666,
+          "persistence_mse": 0.016880043518090533,
+          "latent_std": 0.9303019126993844,
+          "sigreg_loss": 12.336649093122782,
+          "windows": 46065,
+          "ratio": 0.07592377073529848
+        },
+        "rrt_dev": {
+          "pred_loss": 0.0018046526635717066,
+          "persistence_mse": 0.015797415753272738,
+          "latent_std": 0.7977901954518098,
+          "sigreg_loss": 33.67565696772545,
+          "windows": 24420,
+          "ratio": 0.11423720763934685
+        },
+        "cf_dev": {
+          "pred_loss": 0.00076567212207164,
+          "persistence_mse": 0.005880235694293954,
+          "latent_std": 0.6401574011625495,
+          "sigreg_loss": 62.17232879638672,
+          "windows": 37800,
+          "ratio": 0.1302111278999634
+        }
+      },
+      "snapshot": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/epochs/epoch_08",
+      "model_state_sha256": "34846d797136f3b32924e90d7954acd819d50612a9677b058d88f3912ffa6b8d"
+    },
+    {
+      "epoch": 9,
+      "global_step": 326565,
+      "val_pred_loss": 0.0013493567239493132,
+      "val_persistence_mse": 0.022227363660931587,
+      "ratio": 0.06070700711668472,
+      "base_comparable": true,
+      "ratio_to_base": 0.7122009442012395,
+      "val_latent_std": 0.916718602180481,
+      "val_sigreg_loss": 13.656462669372559,
+      "val_loss": 1.230310082435608,
+      "learning_rate": 6.107272961069466e-06,
+      "lr_multiplier": 0.12214545922138931,
+      "extra_validation": {
+        "bench": {
+          "pred_loss": 0.0012163391059792624,
+          "persistence_mse": 0.016543829179829165,
+          "latent_std": 0.9286604088447155,
+          "sigreg_loss": 12.45003185133508,
+          "windows": 46065,
+          "ratio": 0.07352222346820814
+        },
+        "rrt_dev": {
+          "pred_loss": 0.0017554892987137955,
+          "persistence_mse": 0.015946332096479936,
+          "latent_std": 0.7992177885346097,
+          "sigreg_loss": 33.34733776245617,
+          "windows": 24420,
+          "ratio": 0.11008734096923205
+        },
+        "cf_dev": {
+          "pred_loss": 0.0007191176593202664,
+          "persistence_mse": 0.005952747095959947,
+          "latent_std": 0.6405169181270456,
+          "sigreg_loss": 61.5730379942233,
+          "windows": 37800,
+          "ratio": 0.1208043358348488
+        }
+      },
+      "snapshot": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/epochs/epoch_09",
+      "model_state_sha256": "b16f54e0e51d46ada97ea404a2156638f6a2ca16ede289cf1326b15485788a3f"
+    },
+    {
+      "epoch": 10,
+      "global_step": 362850,
+      "val_pred_loss": 0.0012969528324902058,
+      "val_persistence_mse": 0.021730657666921616,
+      "ratio": 0.05968309161965337,
+      "base_comparable": true,
+      "ratio_to_base": 0.7001885980421487,
+      "val_latent_std": 0.9174533486366272,
+      "val_sigreg_loss": 13.668816566467285,
+      "val_loss": 1.2313741445541382,
+      "learning_rate": 5e-06,
+      "lr_multiplier": 0.1,
+      "extra_validation": {
+        "bench": {
+          "pred_loss": 0.0011763565208501876,
+          "persistence_mse": 0.016385796160240954,
+          "latent_std": 0.929564936850962,
+          "sigreg_loss": 12.414793698795194,
+          "windows": 46065,
+          "ratio": 0.07179123366031726
+        },
+        "rrt_dev": {
+          "pred_loss": 0.0017096299158651793,
+          "persistence_mse": 0.015615711675500719,
+          "latent_std": 0.7968811392881752,
+          "sigreg_loss": 33.57438023760122,
+          "windows": 24420,
+          "ratio": 0.109481396134343
+        },
+        "cf_dev": {
+          "pred_loss": 0.0006815409187902573,
+          "persistence_mse": 0.005881256049766817,
+          "latent_std": 0.6398781067916937,
+          "sigreg_loss": 61.30019891648065,
+          "windows": 37800,
+          "ratio": 0.11588356518116218
+        }
+      },
+      "snapshot": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/epochs/epoch_10",
+      "model_state_sha256": "bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e"
+    }
+  ],
+  "base_reference": {
+    "run": "runs/lewm_full_3epochs_002",
+    "ratio": 0.08523859398244682,
+    "base_comparable": true,
+    "base_comparable_reasons": [],
+    "note": "compare the FINAL ratio (annealed LR, like the base's 0.0852); a mid-epoch max_steps stop has epoch snapshots only for completed epochs, its endpoint is final_ratios"
+  },
+  "model_state_sha256": "bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e",
+  "best_checkpoint": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/best-epoch=09-step=362850.ckpt",
+  "last_checkpoint": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/last.ckpt",
+  "final_checkpoint": "<cluster>/lewm-manip/runs/lewm_scratch_S1_b128_c2_001/checkpoints/final.ckpt",
+  "model_state": "final weights (as train.py), not the best checkpoint",
+  "self_check": {
+    "load_world": "ok (staging copy with a provisional summary.json)",
+    "weights_equal": true,
+    "wm_checkpoint_sha256": "bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e",
+    "cache_index_sha256": "25ada0a303fcdbe08b04ae236a4a5d1baef389aa35734d45304171807833c786",
+    "history_size": 3
+  },
+  "load_world_compatible": true,
+  "trainer_callbacks": [
+    "EpochSnapshots",
+    "Timing",
+    "LearningRateMonitor",
+    "RichProgressBar",
+    "RichModelSummary",
+    "PrintProgressBar",
+    "ModuleRegistryCallback",
+    "LoggingCallback",
+    "EnvironmentDumpCallback",
+    "TrainerInfo",
+    "SklearnCheckpoint",
+    "WandbCheckpoint",
+    "TrackioCheckpoint",
+    "SwanLabCheckpoint",
+    "ModuleSummary",
+    "SLURMInfo",
+    "LogUnusedParametersOnce",
+    "HuggingFaceCheckpointCallback",
+    "HardwareMonitor",
+    "ModelCheckpoint"
+  ],
+  "lightning_environment": "SLURMEnvironment(auto_requeue=False)",
+  "timing": {
+    "fit_seconds": 47207.196125743445,
+    "epochs": [
+      {
+        "epoch": 1,
+        "seconds": 4618.229185136035,
+        "optimizer_steps": 36285
+      },
+      {
+        "epoch": 2,
+        "seconds": 4698.620422852226,
+        "optimizer_steps": 36285
+      },
+      {
+        "epoch": 3,
+        "seconds": 4736.145038828719,
+        "optimizer_steps": 36285
+      },
+      {
+        "epoch": 4,
+        "seconds": 4712.311431745067,
+        "optimizer_steps": 36285
+      },
+      {
+        "epoch": 5,
+        "seconds": 4639.604104739148,
+        "optimizer_steps": 36285
+      },
+      {
+        "epoch": 6,
+        "seconds": 4784.876921329182,
+        "optimizer_steps": 36285
+      },
+      {
+        "epoch": 7,
+        "seconds": 4685.820666654035,
+        "optimizer_steps": 36285
+      },
+      {
+        "epoch": 8,
+        "seconds": 4777.45146080805,
+        "optimizer_steps": 36285
+      },
+      {
+        "epoch": 9,
+        "seconds": 4733.503871813882,
+        "optimizer_steps": 36285
+      },
+      {
+        "epoch": 10,
+        "seconds": 4750.768919552211,
+        "optimizer_steps": 36285
+      }
+    ],
+    "validations": [
+      {
+        "global_step": 0,
+        "sanity": true,
+        "seconds": 4.72453756025061
+      },
+      {
+        "global_step": 36285,
+        "sanity": false,
+        "seconds": 199.83170344587415
+      },
+      {
+        "global_step": 72570,
+        "sanity": false,
+        "seconds": 201.46594339888543
+      },
+      {
+        "global_step": 108855,
+        "sanity": false,
+        "seconds": 200.23569377418607
+      },
+      {
+        "global_step": 145140,
+        "sanity": false,
+        "seconds": 205.65931169036776
+      },
+      {
+        "global_step": 181425,
+        "sanity": false,
+        "seconds": 206.953244574368
+      },
+      {
+        "global_step": 217710,
+        "sanity": false,
+        "seconds": 200.788140156772
+      },
+      {
+        "global_step": 253995,
+        "sanity": false,
+        "seconds": 204.80125493276864
+      },
+      {
+        "global_step": 290280,
+        "sanity": false,
+        "seconds": 201.31159021519125
+      },
+      {
+        "global_step": 326565,
+        "sanity": false,
+        "seconds": 216.1854721517302
+      },
+      {
+        "global_step": 362850,
+        "sanity": false,
+        "seconds": 206.52419072343037
+      },
+      {
+        "global_step": 362850,
+        "sanity": false,
+        "seconds": 58.12680921610445
+      }
+    ],
+    "train_seconds_per_step_incl_validation": 0.13010113304600646,
+    "train_seconds_per_step_excl_validation": 0.12429540645970377
+  },
+  "warning": "Finite/low latent loss is not proof of long-horizon or physical correctness; the ratio is a latent metric."
+}

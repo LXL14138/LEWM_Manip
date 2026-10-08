@@ -1,0 +1,28 @@
+{
+  "note": "The three scene files in env/ are byte-identical copies of the project's scene sources (the files collect_random_branches.py fingerprints as the scene). Verified with cmp and sha256sum (WSL, 2026-10-08); env_demo.py and requirements-env.txt are new files of the release package.",
+  "project_root": "the training project's root directory (src paths below are relative to it; this package is its exports/wm_S1_release_001 subdirectory)",
+  "files": [
+    {
+      "src": "three_block_scene.py",
+      "dst": "env/three_block_scene.py",
+      "sha256": "3d7e504915940ebfec87a24bc043734ec0353932edea1bd9eaf325dacb1776c8",
+      "bytes": 30557,
+      "verbatim": true
+    },
+    {
+      "src": "scene_config.py",
+      "dst": "env/scene_config.py",
+      "sha256": "ef5667a1d6bcc3a74924e206db22ca20cfed4647849739049c6587d824289e2c",
+      "bytes": 2996,
+      "verbatim": true
+    },
+    {
+      "src": "task_progress.py",
+      "dst": "env/task_progress.py",
+      "sha256": "89ab0c1d1b52c506cd18e289ecee3c7ae29fc12a15173bd60073b434f35e0c1c",
+      "bytes": 2843,
+      "verbatim": true
+    }
+  ],
+  "not_copied": "wrist_camera.py (wrist camera subclass, unused), auto_grasp.py / exploration.py / the collectors (pygame windows, project-internal imports); env_demo.py re-implements the same waypoint controller in ~40 lines."
+}

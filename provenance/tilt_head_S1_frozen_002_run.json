@@ -1,0 +1,329 @@
+{
+  "tool": "bind_frozen_tilt_head",
+  "tool_version": 1,
+  "args": {
+    "run": "runs/lewm_scratch_S1_b128_c2_001",
+    "cache": "data/wm_full_001",
+    "lewm_repo": "<le-wm>",
+    "bench_cache": "data/wm_train_bench_001",
+    "source_head": "runs/compare_wm_physical_s1_001/tilt_s1/heads/tilt_L0_seed0.pt",
+    "tilt_run": "runs/compare_wm_physical_s1_001/tilt_s1",
+    "bench_latents": "runs/compare_wm_physical_s1_001/bench_latents_s1/latents.h5",
+    "output": "runs/tilt_head_S1_frozen_002",
+    "export_recall": 0.95,
+    "device": "cpu"
+  },
+  "binding": {
+    "wm_checkpoint_sha256": "bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e",
+    "cache_index_sha256": "25ada0a303fcdbe08b04ae236a4a5d1baef389aa35734d45304171807833c786",
+    "upstream_sha256": {
+      "jepa.py": "41bad7fd21e0f14aea4c9c3d39a9c87037e787746d953ab62cdc0677e938ce96",
+      "module.py": "0b258a9e8dc24c29fcb1e8c50a09ec78b8ea85aeb79e21dd8adf712396646620",
+      "config/train/model/lewm.yaml": "7be97eaa2c83f809b9ea7a6da5a7d3f3c70502c27537383f54db32335e21e42b"
+    },
+    "latent_interface": "model.encode({'pixels': normalized_rgb})['emb']; post-projector",
+    "pixel_output": "unbounded RGB regression; target cached uint8 / 255",
+    "decoder_architecture": {
+      "cls_dim": 192,
+      "img_size": 224,
+      "patch_size": 16,
+      "dim": 256,
+      "heads": 8,
+      "depth": 3
+    },
+    "eval_cache_path": "<project>/data/wm_train_bench_001",
+    "eval_cache_index_sha256": "b313c8087f2896207cac4a30d4c5ecb58ffc15888d8523334797e630cc6503c3"
+  },
+  "head_binding": {
+    "wm_checkpoint_sha256": "bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e",
+    "cache_index_sha256": "25ada0a303fcdbe08b04ae236a4a5d1baef389aa35734d45304171807833c786",
+    "upstream_sha256": {
+      "jepa.py": "41bad7fd21e0f14aea4c9c3d39a9c87037e787746d953ab62cdc0677e938ce96",
+      "module.py": "0b258a9e8dc24c29fcb1e8c50a09ec78b8ea85aeb79e21dd8adf712396646620",
+      "config/train/model/lewm.yaml": "7be97eaa2c83f809b9ea7a6da5a7d3f3c70502c27537383f54db32335e21e42b"
+    },
+    "latent_interface": "model.encode({'pixels': normalized_rgb})['emb']; post-projector",
+    "label_rule": {
+      "safe": 0,
+      "unsafe": 1,
+      "scope": "guard_tilt_only",
+      "threshold_deg": 30.0,
+      "numerical_tolerance_deg": 1e-07,
+      "com_displacement_used": false,
+      "episode_failure_latch_used": false
+    }
+  },
+  "encoder_digest": "f295473cc367863373dcd5e07f12885312cd0487a4846bc9ad48dd6563554210",
+  "inputs_sha256": {
+    "source_head": "92b98c9a7b177f07729f3872e2d7630277f247a9537da3056b5021be273a3d1e",
+    "tilt_run/run.json": "88e6fbd2296841058312f394fe45e22581fbb72285589b84fc21aa78d10ad7f6",
+    "tilt_run/summary.json": "6a1848c3dc5e09fa91384ba7cc039ac3a43a246d708b6ee64a6fe752207d7580",
+    "bench_latents": "7133cfa60ffc6a1986620f704d385636ed9e275ac6b1c5451b682d4651b476cb",
+    "bench_cache/index.json": "b313c8087f2896207cac4a30d4c5ecb58ffc15888d8523334797e630cc6503c3",
+    "cache/index.json": "25ada0a303fcdbe08b04ae236a4a5d1baef389aa35734d45304171807833c786",
+    "run/model_state.pt": "bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e"
+  },
+  "bench_latents_encoder_digest_check": {
+    "checked": true,
+    "stored": "f295473cc367863373dcd5e07f12885312cd0487a4846bc9ad48dd6563554210",
+    "loaded": "f295473cc367863373dcd5e07f12885312cd0487a4846bc9ad48dd6563554210"
+  },
+  "bench_dev": {
+    "episodes": 480,
+    "frames": 139179,
+    "unsafe_frames": 25395,
+    "frames_ge15": 35882,
+    "frames_ge30": 25395
+  },
+  "bench_test_episodes": 961,
+  "bench_dev_use": "threshold + verification only (never fitting / selection)",
+  "parity_check": "not run: --bench-cache index.json only; latents bound to the WM by encoder digest",
+  "source_head": {
+    "path": "<project>/runs/compare_wm_physical_s1_001/tilt_s1/heads/tilt_L0_seed0.pt",
+    "sha256": "92b98c9a7b177f07729f3872e2d7630277f247a9537da3056b5021be273a3d1e",
+    "format": "compare_wm_physical_tilt_head_v1",
+    "loss": "L0",
+    "seed": 0,
+    "selected_epoch": 27,
+    "latent_dim": 192,
+    "hidden": 256
+  },
+  "tilt_run": {
+    "path": "<project>/runs/compare_wm_physical_s1_001/tilt_s1",
+    "run_json_sha256": "88e6fbd2296841058312f394fe45e22581fbb72285589b84fc21aa78d10ad7f6",
+    "summary_json_sha256": "6a1848c3dc5e09fa91384ba7cc039ac3a43a246d708b6ee64a6fe752207d7580",
+    "recipe_sha256": "13f98aec70d39499ffb1f33f45524f23d8c278ea9de4657ce9357211ff58661b",
+    "training_rows": {
+      "wm_full_001_train": {
+        "episodes": 4500,
+        "frames": 1000774
+      },
+      "wm_train_bench_001_bench_test": {
+        "episodes": 961,
+        "frames": 280309
+      },
+      "unsafe_frames": 61366,
+      "frames_ge15": 92100,
+      "unsafe_flag_vs_tilt_gt30_mismatches": 0
+    },
+    "bench_dev": {
+      "episodes": 480,
+      "frames": 139179,
+      "anchors": 137739,
+      "frames_ge15": 35882,
+      "frames_ge30": 25395
+    },
+    "head": {
+      "loss": "L0",
+      "seed": 0,
+      "selected_epoch": 27,
+      "holdout_mae_all": 1.1060145265570918,
+      "holdout": {
+        "mae": {
+          "all": 1.1060145265570918,
+          "unsafe": 10.122532431015838,
+          "safe": 0.6535858243375635,
+          "band_20_30": 3.346175216861765,
+          "band_30_40": 3.688236339744934
+        },
+        "alarm_22": {
+          "line_deg": 22.0,
+          "true_over_line": 7384,
+          "predicted_over_line": 7272,
+          "recall": 0.9282231852654388,
+          "false_alarm_rate": 0.003409851043349159,
+          "precision": 0.9425192519251925,
+          "f1": 0.9353165938864629,
+          "confusion_rows_true_cols_pred_under_over": [
+            [
+              122168,
+              418
+            ],
+            [
+              530,
+              6854
+            ]
+          ]
+        }
+      },
+      "fit_rows": 1151113,
+      "holdout_rows": 129970,
+      "pos_weight": 10.0,
+      "seconds": 39.52530977799961,
+      "path": "heads/tilt_L0_seed0.pt",
+      "sha256": "92b98c9a7b177f07729f3872e2d7630277f247a9537da3056b5021be273a3d1e"
+    }
+  },
+  "provenance": {
+    "kind": "frozen_real_latent_head",
+    "source_tool": "compare_wm_physical tilt",
+    "source_head": {
+      "path": "<project>/runs/compare_wm_physical_s1_001/tilt_s1/heads/tilt_L0_seed0.pt",
+      "sha256": "92b98c9a7b177f07729f3872e2d7630277f247a9537da3056b5021be273a3d1e"
+    },
+    "tilt_run": {
+      "path": "<project>/runs/compare_wm_physical_s1_001/tilt_s1",
+      "run_json_sha256": "88e6fbd2296841058312f394fe45e22581fbb72285589b84fc21aa78d10ad7f6",
+      "summary_json_sha256": "6a1848c3dc5e09fa91384ba7cc039ac3a43a246d708b6ee64a6fe752207d7580"
+    },
+    "loss": "L0",
+    "seed": 0,
+    "selected_epoch": 27,
+    "holdout_mae_all": 1.1060145265570918,
+    "holdout": {
+      "mae": {
+        "all": 1.1060145265570918,
+        "unsafe": 10.122532431015838,
+        "safe": 0.6535858243375635,
+        "band_20_30": 3.346175216861765,
+        "band_30_40": 3.688236339744934
+      },
+      "alarm_22": {
+        "line_deg": 22.0,
+        "true_over_line": 7384,
+        "predicted_over_line": 7272,
+        "recall": 0.9282231852654388,
+        "false_alarm_rate": 0.003409851043349159,
+        "precision": 0.9425192519251925,
+        "f1": 0.9353165938864629,
+        "confusion_rows_true_cols_pred_under_over": [
+          [
+            122168,
+            418
+          ],
+          [
+            530,
+            6854
+          ]
+        ]
+      }
+    },
+    "holdout_rows": 129970,
+    "fit_rows": 1151113,
+    "training_rows": {
+      "wm_full_001_train": {
+        "episodes": 4500,
+        "frames": 1000774
+      },
+      "wm_train_bench_001_bench_test": {
+        "episodes": 961,
+        "frames": 280309
+      },
+      "unsafe_frames": 61366,
+      "frames_ge15": 92100,
+      "unsafe_flag_vs_tilt_gt30_mismatches": 0
+    },
+    "recipe": {
+      "horizons": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        20
+      ],
+      "rollout_steps": 20,
+      "growth_horizons": [
+        5,
+        10,
+        20
+      ],
+      "losses": [
+        "L0",
+        "L4"
+      ],
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "train": {
+        "epochs": 30,
+        "batch_size": 2048,
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0001,
+        "hidden": 256,
+        "select_metric": "mae_all"
+      },
+      "holdout_fraction": 0.1,
+      "bands": [
+        [
+          "all",
+          null,
+          null
+        ],
+        [
+          "true_lt15",
+          null,
+          15.0
+        ],
+        [
+          "true_15_30",
+          15.0,
+          30.0
+        ],
+        [
+          "true_ge15",
+          15.0,
+          null
+        ],
+        [
+          "true_ge30",
+          30.0,
+          null
+        ]
+      ],
+      "growing_stratum": "truth(t+k) - truth(t) >= growth_min_deg",
+      "alarm_lines": [
+        22.0,
+        30.0
+      ],
+      "bootstrap": 1000,
+      "bootstrap_seed": 0,
+      "pre_onset_frames": 20,
+      "growth_min_deg": 1.0,
+      "latent_precision": "float32",
+      "training_rows": "goal_classifier extract train.h5 (wm_full_001 TRAIN, frames t % 4 in {0,1}) + every frame of the wm_train_bench_001 bench_test episodes (score_bench float32 latents)",
+      "holdout_rule": "per seed: goal_classifier.partition_episodes(ids, holdout_fraction, seed) separately on the wm_full_001 train episodes and on the bench_test episodes; epoch = lowest holdout MAE (tilt_loss_ablation.train_one, select_metric mae_all); bench_dev is never used for fitting or selection",
+      "evaluation": "wm_train_bench_001 bench_dev: every anchor t >= 2 with t + k <= T - 1; context real z_{t-2..t}; recorded normalised actions; float32, TF32 off; wm = head(zhat_{t+k}); persistence_truth = true tilt(t); persistence_readout = head(z_t); ceiling = head(z_{t+k}); truth = max guard tilt at t+k",
+      "paired_intervals": "episode cluster bootstrap (forecast_growth.bootstrap_weights / mean_with_interval) of the mean per-anchor difference of seed-mean absolute errors"
+    },
+    "recipe_sha256": "13f98aec70d39499ffb1f33f45524f23d8c278ea9de4657ce9357211ff58661b",
+    "selection_rule": "pre-declared: the given head (default use: loss L0 seed 0); never selected on evaluation data",
+    "fit_on": "frozen REAL latents of wm_full_001 TRAIN + wm_train_bench_001 bench_test; no predicted-latent term; epoch chosen on a 10% holdout of TRAINING episodes",
+    "planner_use": "row 0 (tilt/30)",
+    "outputs": [
+      "tilt_deg / 30",
+      "unsafe_logit"
+    ],
+    "unsafe_threshold": 0.9608285427093506,
+    "export_recall": 0.95,
+    "threshold_note": "sigmoid(unsafe logit) of head(z_t) on the REAL float32 latents of every wm_train_bench_001 bench_dev frame (k = 0, perception, no rollout); 95% recall; finetune_tilt chose B's threshold on PREDICTED latents head(p_k) at k = 3 on bench_dev windows, so the two thresholds are not comparable; never chosen on wm_bench_001",
+    "world_model_updated": false,
+    "world_model_kind": "from-scratch pure-dynamics LeWM (no tilt head trained with it); the export's 'reads_finetuned_world_model' wording is tilt_head.py's fixed field name",
+    "test_used": false
+  },
+  "implementation_sha256": {
+    "bind_frozen_tilt_head.py": "350c788163270c0b9775020ccf767d1eb4a39bec53c66b54e9c1e731ac63c3b2",
+    "tilt_head.py": "655d9aa3d90f92a932e848d41872224749e5e61d564792882124cc2a1bdf434a",
+    "safety_classifier.py": "ecefdf3921c435c5add94a26fc15f8106dcf3455cc7535d2f0a99ab82c82ec82",
+    "evaluate_bench_wm.py": "1db36d15fc6b8f1ab35c489f489e68cd2dc63f71056b3a95240212fbd825aa49",
+    "eval_cache.py": "c632caf72df3e23bba2c33de2e05524d7cfb90f6cfdb2d20f9d0b676fd4a927b",
+    "decoder.py": "f0d64c06d920a0fb7c243bc240c93c18b199a159b0e426f085c0ad1dcbc380b2",
+    "evaluate_short.py": "75d42c28c7c2572c33cff906a0fab5d5392b2f990642026d10e8c2118a96267a",
+    "check_encoder_digest.py": "75f2ff408a61742c79fc69444c8b5f2c3af3401f8d431813b20c163776ebf7ed",
+    "finetune_tilt.py": "9ecc5c95e6d592edaa312150cfb92a52cd9dae7555ceb8bbf699ab46bedf0906",
+    "danger_strata.py": "ddd69da398b30c9c8ad2f048ddd9896a6aa00b64298f1f92f3abf2efa4a852d1",
+    "prepare_data.py": "c9345fe631ee0adeb166b94413e4b8b9d8f0b511c3b31607f75f8ebef009f2db",
+    "provenance.py": "f4a6be334e4ded06100c0756e9426057c065fcf2439bccc309a8b037158dc15e"
+  },
+  "precision": "float32, TF32 off",
+  "device": "cpu",
+  "test_used": false,
+  "world_model_updated": false
+}

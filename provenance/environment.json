@@ -1,0 +1,51 @@
+{
+  "timestamp": "2026-10-03T07:03:12.775724",
+  "python": {
+    "version": "3.10.21 (main, Aug 25 2026, 14:01:09) [Clang 22.1.3 ]",
+    "version_info": {
+      "major": 3,
+      "minor": 10,
+      "micro": 21
+    },
+    "executable": "<cluster-venv>/bin/python",
+    "prefix": "<cluster-venv>"
+  },
+  "system": {
+    "platform": "Linux-5.14.0-570.62.1.el9_6.x86_64-x86_64-with-glibc2.34",
+    "system": "Linux",
+    "release": "5.14.0-570.62.1.el9_6.x86_64",
+    "machine": "x86_64",
+    "processor": "x86_64",
+    "hostname": "c2-gpu-010"
+  },
+  "packages": {
+    "pip_freeze": "Error getting pip freeze: Command '['<cluster-venv>/bin/python', '-m', 'pip', 'freeze']' returned non-zero exit status 1.",
+    "key_packages": {},
+    "total_packages": 0
+  },
+  "cuda": {
+    "nvidia_smi_output": "NVIDIA H100 80GB HBM3, 580.105.08, 81559 MiB",
+    "driver_version": "580.105.08"
+  },
+  "git": null,
+  "slurm": {
+    "SLURM_JOB_ID": "3292610",
+    "SLURM_JOB_NAME": "S1",
+    "SLURM_JOB_PARTITION": "general-gpu",
+    "SLURM_JOB_NODELIST": "c2-gpu-010",
+    "SLURM_JOB_NUM_NODES": "1",
+    "SLURM_NTASKS": "1",
+    "SLURM_CPUS_PER_TASK": "24",
+    "SLURM_MEM_PER_NODE": "98304",
+    "SLURM_SUBMIT_DIR": "<cluster-home>",
+    "SLURM_CLUSTER_NAME": "compute2"
+  },
+  "environment_variables": {
+    "CUDA_VISIBLE_DEVICES": "0",
+    "OMP_NUM_THREADS": "24",
+    "PATH": "<cluster-home>/.local/bin:<cluster-home>/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/opt/dell/srvadmin/bin",
+    "MKL_NUM_THREADS": "24",
+    "LD_LIBRARY_PATH": "<cluster-venv>/lib/python3.10/site-packages/cv2/../../lib64:",
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+  }
+}
