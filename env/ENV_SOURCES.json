@@ -1,5 +1,5 @@
 {
-  "note": "The three scene files in env/ are byte-identical copies of the project's scene sources (the files collect_random_branches.py fingerprints as the scene). Verified with cmp and sha256sum (WSL, 2026-10-08); env_demo.py and requirements-env.txt are new files of the release package.",
+  "note": "The three scene files in env/ are byte-identical copies of the project's scene sources (the files collect_random_branches.py fingerprints as the scene). Verified with cmp and sha256sum (WSL, 2026-10-08); env_demo.py and requirements-env.txt are new files of the release package. rrt_action_law.py (added 2026-10-14) is a byte-identical copy of the project's RRT action law (the file the pilot's run.json records with the same sha256); task_demo.py is a new file that imports it and RE-IMPLEMENTS the pieces of the project's latent_planner/planner.py it needs (cycle_seed, candidate_directions, ContinuedHold, make_runner, check_runner, nominal_rollout, expand_node, select_candidate in tilt mode, ArrivalCounter) and the episode loop of closed_loop_eval.py; each function names its source lines.",
   "project_root": "the training project's root directory (src paths below are relative to it; this package is its exports/wm_S1_release_001 subdirectory)",
   "files": [
     {
@@ -21,6 +21,13 @@
       "dst": "env/task_progress.py",
       "sha256": "89ab0c1d1b52c506cd18e289ecee3c7ae29fc12a15173bd60073b434f35e0c1c",
       "bytes": 2843,
+      "verbatim": true
+    },
+    {
+      "src": "rrt_action_law.py",
+      "dst": "env/rrt_action_law.py",
+      "sha256": "513d5e414b1a418d97902b95f1236217ab2e0b6535d0158be4d0c0970d546647",
+      "bytes": 33556,
       "verbatim": true
     }
   ],

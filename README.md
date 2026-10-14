@@ -19,30 +19,63 @@ Everything needed to run the model is in this directory. **No training data is i
 | `demo.py` | loads the model, encodes three frames, rolls out 24 actions, prints the predicted red-pillar tilt per step and checks the rollout against `examples/expected_rollout.npz` (`PASS` / `FAIL`) |
 | `examples/` | one 3-frame window from a **training** episode with its 24 following actions and the true tilt; the expected rollout latents for the self-check |
 | `heads/tilt_head.pt` | the tilt / unsafe read-out head fitted on S1's frozen real latents (row 0 × 30 = tilt in degrees, row 1 = unsafe logit) |
-| `provenance/` | the training run's `run.json` / `summary.json` / `environment.json`, the head's records, and the physical-comparison report (Chinese); machine-specific absolute paths in these records are replaced by placeholders (`<project>`, `<cluster>`, `<le-wm>`) |
+| `provenance/` | the training run's `run.json` / `summary.json` / `environment.json` and the head's records; machine-specific absolute paths in these records are replaced by placeholders (`<project>`, `<cluster>`, `<le-wm>`) |
 | `RUNNING.md` | the exact commands that were run to verify this package, with their complete outputs, parity numbers and known limitations |
 | `tools/` | the scripts that built the example and ran the parity check — they need the training repository and are **not** part of the runnable API |
 | `env/` | the simulator add-on: the MuJoCo three-block scene the model was trained on (`three_block_scene.py`, `scene_config.py`, `task_progress.py`, verbatim copies of the project's scene, hashes in `env/ENV_SOURCES.json`), `env_demo.py` (scripted push of a pillar with the model's predictions next to the simulator's truth) and `requirements-env.txt` (the simulator packages). See "Running the model in the simulator" below |
 | `examples/env_demo_*` | our run of `env/env_demo.py`: `env_demo_reference.npz` (its commands and truth, for `--compare`), `env_demo_expected_summary.json` (its numbers), `env_demo_strip.png` / `env_demo_rollout.gif` (what it looks like) |
+| `env/task_demo.py`, `env/rrt_action_law.py` | the closed-loop task demo: the model as the decision maker's safety check (the project planner's veto + selection rule, re-implemented from `latent_planner/planner.py`) in six grasp-and-carry tasks, each run with and without the check; `rrt_action_law.py` is the verbatim copy of the project's action law it executes. See "Running the model in a closed-loop task" |
+| `examples/task_demo_*` | our run of `env/task_demo.py`: `task_demo_expected_summary.json` (every number, for `--compare`), `task_demo_strip_safety.png` / `task_demo_strip_nosafety.png` (five frames of every episode, with and without the check) |
 | `requirements.txt`, `SHA256SUMS`, `LICENSE` | pinned dependencies; checksums of every file; license |
 
 ## Quick start
 
 ```bash
-# 1. the upstream LeWM model code; the bundle records this exact commit and the loader refuses any other
+# 0. this repository; every command below runs from inside it (the requirements files and demo.py live here)
+#    Windows: clone and run inside WSL (Ubuntu), not from PowerShell / Git Bash
+git clone https://github.com/LXL14138/LEWM_Manip.git && cd LEWM_Manip
+
+# 1. everything else (tested on Linux and WSL; macOS: see the note below)
+bash quickstart.sh
+```
+
+`quickstart.sh` does the manual steps below in one go and checks each of them: it finds a Python 3.10 (an existing
+`./.venv`, `$PYTHON310`, `python3.10` on PATH, or one provisioned through `uv`), creates `./.venv`, clones the upstream LeWM code into `./le-wm`
+at the pinned commit, installs the torch CPU wheels + `requirements.txt` + `env/requirements-env.txt`, verifies
+`SHA256SUMS`, runs `demo.py` (must print `PASS`), probes a MuJoCo rendering backend (`egl`, then `osmesa`, then
+`glfw`, or your exported `MUJOCO_GL`) and runs the simulator demo (must print `DEMO OK`; its outputs go to
+`env_demo_out/`, `env_demo_out_2/`, ... on repeated runs). Every step prints `OK` or a `FAIL` line that says what is
+wrong and what to do; re-running continues where it stopped (the venv and the clone are reused, satisfied installs
+are skipped, the demos run again). First run ~3 min and 2.5 GB of packages; later runs ~40 s. Flags: `--no-sim`
+(model demo only, no simulator packages), `--cuda` (plain `pip install torch==2.14.0 torchvision==0.29.0` instead of
+the CPU wheels), `--skip-install` (do not run pip), `--help`. The complete output of our run is in `RUNNING.md` §10.
+
+Platforms: tested on Linux and WSL (Ubuntu 24.04); `bash` 3.2 is enough. On Windows use WSL and clone inside it —
+the repository's `.gitattributes` keeps every file LF on any checkout, and the script refuses to run if it still finds
+CRLF line endings (`FAIL ... CRLF`, with the fix). macOS is untested: Apple silicon should work (`shasum` is used in
+place of `sha256sum`; without GNU `timeout` — `brew install coreutils` — a step that hangs is not detected), Intel Macs
+cannot, because torch 2.14.0 has no x86_64 macOS wheels.
+
+### Manual steps (what quickstart.sh does)
+
+```bash
+# 1. the upstream LeWM model code, cloned next to this README; the bundle records this exact commit and the loader refuses any other
 git clone https://github.com/lucas-maes/le-wm.git
 git -C le-wm checkout 8edfeb336732b5f3ce7b8b210d0ba370a09e2cac
 
 # 2. python environment (Python 3.10 is required; CPU is enough for inference)
 #    if your distribution has no python3.10 (Ubuntu 24.04 ships 3.12), get one with uv or pyenv, e.g.
-#    uv python install 3.10 && uv venv -p 3.10 .venv    (Python 3.12 was not tested)
+#    uv python install 3.10 && uv venv --seed -p 3.10 .venv    (--seed gives the venv a pip; Python 3.12 was not tested)
 python3.10 -m venv .venv && source .venv/bin/activate
 pip install torch==2.14.0 torchvision==0.29.0 --index-url https://download.pytorch.org/whl/cpu   # or a CUDA wheel
-pip install -r requirements.txt
+pip install -r requirements.txt -r env/requirements-env.txt   # one call; the second file is only needed for the simulator demo
 
-# 3. verify the files and run the demo
+# 3. verify the files and run the demo (macOS: shasum -a 256 -c SHA256SUMS)
 sha256sum -c SHA256SUMS
 python demo.py --upstream ./le-wm
+
+# 4. the simulator demo (needs a MuJoCo rendering backend, see the GL note in the simulator section)
+MUJOCO_GL=egl python env/env_demo.py --upstream ./le-wm
 ```
 
 The demo ends with `PASS max|diff| ctx=0.000e+00 roll=0.000e+00 (tol 0.0001)` when its rollout matches the shipped
@@ -54,7 +87,7 @@ level, outside the PASS contract); `--threads N`.
 
 Note: the shipped example comes from a training episode that never touches a pillar, so its true tilt is 0° at every
 step and the demo shows the head reading ≈ 0° — it demonstrates the pipeline and the numerical parity, not the head's
-sensitivity. The real evaluations are the reports in `provenance/`.
+sensitivity. The real evaluations are summarised in "What it is good at — and not" below.
 
 ## Using the model in your own code
 
@@ -108,8 +141,8 @@ step t ≥ 2 the world model receives exactly what it received in training — t
 tilt read-out k = 1, 5, 10 and 20 steps ahead (0.05 s per step) is printed next to the simulator's true tilt of frame
 t+k. The tilt head is also read on the real latents of every frame (k = 0).
 
-**Install** (same Python 3.10 venv as above; both requirement files in one pip call — if `requirements.txt` was already
-installed, the gymnasium 1.4.0 → 1.3.0 downgrade message is expected):
+**Install** (already done by `quickstart.sh`; manually: same Python 3.10 venv as above; both requirement files in one
+pip call — if `requirements.txt` was already installed, the gymnasium 1.4.0 → 1.3.0 downgrade message is expected):
 
 ```bash
 pip install -r requirements.txt -r env/requirements-env.txt
@@ -123,8 +156,8 @@ chosen with the environment variable `MUJOCO_GL` (`--gl` sets it, overriding an 
 `egl` — headless, needs a GPU driver that exposes EGL (what we used); `glfw` — needs a display (WSLg / X11 / macOS /
 Windows); `osmesa` — CPU Mesa, headless anywhere, slow.
 
-**Run** (from the package root; measured in a fresh single venv on a 2-thread CPU: 24 s wall, peak RSS 1.48 GB; as two
-stages 7 s + 22 s):
+**Run** (already done by `quickstart.sh`, which also picks the `MUJOCO_GL` backend for you; manually: from the package
+root; measured in a fresh single venv on a 2-thread CPU: 24 s wall, peak RSS 1.48 GB; as two stages 7 s + 22 s):
 
 ```bash
 MUJOCO_GL=egl python env/env_demo.py --upstream ./le-wm                # [--encoder-builder transformers] [--head none]
@@ -201,6 +234,136 @@ Importing the scene pulls torch, torchvision, pygame, pymunk and shapely through
 `ale-py` UserWarning is printed. The script is ~500 lines; `--stage sim` / `--stage wm` split it for machines whose
 simulator and torch environments are separate (that is how it was verified here, see `RUNNING.md` §9).
 
+## Running the model in a closed-loop task
+
+`env/task_demo.py` lets the model **decide**, the way the project's latent-RRT pilot used it, in the live simulator:
+the gripper holds the green block at a named start pose and has to bring it to a goal point; every 8 control steps
+(0.4 s) the model imagines 32 random candidate moves plus "hold" and **vetoes** every candidate whose predicted
+red-pillar tilt reaches 15° at any of the next 20 steps; among the survivors a simple progress rule picks the move; the
+simulator judges. Each task runs twice, with the model's check and without it (`--no-safety`: nothing is vetoed, the
+same candidates and the same progress rule), so the two columns of the results table differ only by the model's veto.
+
+**What is the project's and what is not.** From the pilot (`latent_planner/planner.py`, `closed_loop_eval.py`, not
+included here; the functions are re-implemented in `task_demo.py` with the source lines named): the candidate set
+(32 unit directions, normal std (1, 1, 0.5), seeded per cycle), the nominal actions fed to the model (the pilot's
+action law driving its calibrated plant model: 8 edge steps at 1 mm reference advance per step, then 12 hold steps;
+`env/rrt_action_law.py` is the verbatim copy of that law, sha256 in `env/ENV_SOURCES.json`), the batched 20-step
+rollout and the tilt read-out, the 15° line, the selection rule (an edge beats hold only if it improves the step-8
+progress signal by ≥ 0.25 cm; ties by predicted tilt; hold rejected but some edge accepted → the accepted edge with the
+smallest predicted tilt; everything rejected → hold), the executed 8-step moves through the same action law (the hold
+continues the previous hold, an edge continues the previous edge), the 3-frame context with the two previous commands,
+the 800-step timeout and the 30° topple rule. **Not** from the pilot: there is no latent tree (depth 1, as in the
+pilot's delivered configuration), no distance head and no arrival classifier (the package ships no goal-image heads),
+so the progress signal is **geometric**: the simulator's own pinch position plus 8 mm along the candidate direction
+(box-clipped like the law's reference; 8 mm is the reference advance — the plant model and the real gripper cover
+~5–6 mm per edge, so the signal is slightly optimistic, and `cycles.csv` also logs the plant's own step-8 distance),
+distance to the goal; and arrival is the pinch within 1.5 cm of the goal (the
+scene judge's hover tolerance) for 3 consecutive cycles while the block is still grasped. In other words: the model
+supplies the safety judgement only; the progress signal is privileged truth and, unlike the pilot's learned signal,
+noise-free and relentless. Nothing recorded is replayed and nothing derived from recorded episodes is shipped: the
+starts are produced live by a scripted grasp → lift → carry → descend (the `env_demo.py` waypoint controller), the goal
+is a point.
+
+**Run** (after `quickstart.sh`; from the package root; `--out` must be a new directory):
+
+```bash
+MUJOCO_GL=egl .venv/bin/python env/task_demo.py --upstream ./le-wm                      # all 6 tasks, with and without the check
+MUJOCO_GL=egl .venv/bin/python env/task_demo.py --upstream ./le-wm --out run2 --compare examples/task_demo_expected_summary.json
+# options: --tasks name,name  --no-safety  --gif (rollout.gif per episode)  --max-steps 800  --seed 0  --threads 4  --fallback hold|retreat
+```
+
+The terminal shows, per episode, the scripted start (achieved pose, grip offset, max pillar tilt during the start —
+asserted < 5°), one progress line every 10 cycles (reason, rejected candidates, predicted tilt of the chosen move vs
+the true tilt now, distance to the goal, planning time) and the outcome; then the table of all episodes, the
+with-vs-without comparison and a one-line verdict. Written to `--out`: `summary.json` (everything), per episode
+`<task>_<mode>/cycles.csv` (one row per decision: reason, counts of accepted / rejected / reducing candidates,
+predicted max tilt of the chosen move and of hold, the head's reading on the current frame, true tilt, distances), 
+`steps.csv` (one row per control step: command, pinch, block, both pillar tilts, grasped, distances), `summary.json`
+and with `--gif` a `rollout.gif`; `strip_safety.png` / `strip_nosafety.png` (five frames of every episode).
+
+**Tasks** (chosen from the pilot's start groups and goal box before any model run, never tuned on the results; green
+block COM positions in metres; pillars at (0.425, ±0.05), tops at z = 0.10, faces at |y| = 0.03 / 0.07):
+
+| task | group | start (green COM) | goal | straight line vs pillars |
+|---|---|---|---|---|
+| `normal_free` | normal | (0.425, 0, 0.185) | (0.455, 0.025, 0.165) | 4.4 cm in free space above the pillars |
+| `normal_into_slot` | normal | (0.425, 0, 0.190) | (0.425, 0, 0.155) | 3.5 cm straight down into the 1-cm slot; clear, lateral error touches |
+| `slot_exit_right` | slot | (0.425, 0, 0.125) | (0.445, 0.030, 0.170) | 5.0 cm; the line passes **against** the right pillar |
+| `outer_left_in` | outer_left | (0.425, −0.0975, 0.125) | (0.425, −0.020, 0.170) | 8.9 cm; the line runs **through** the left pillar |
+| `outer_right_in` | outer_right | (0.425, +0.0975, 0.125) | (0.425, +0.020, 0.170) | 8.9 cm; mirror, through the right pillar |
+| `outer_right_cross` | outer_right | (0.425, +0.0975, 0.130) | (0.410, −0.030, 0.160) | 13.1 cm across both pillars; through the right pillar |
+
+The scripted start reaches every pose with the pillars untouched (max tilt 0.000° during all six starts) but 4.4–5.8 mm
+off, mostly low (the waypoint controller is proportional only and sags under the block's weight) and 2 mm short in x;
+the achieved poses — green z 0.181 / 0.186 for the normal tasks, 0.120–0.125 and 4.6–4.9 cm from the nearest pillar
+for the near-pillar tasks — are inside the pilot's group definitions, and the demo prints them.
+
+**Our results** (`examples/task_demo_expected_summary.json`; 4 CPU threads, MuJoCo 3.11.0, EGL; two full runs gave
+bit-identical decisions and trajectories):
+
+| task | with the model's check | without it (`--no-safety`) |
+|---|---|---|
+| `normal_free` | success, 50 steps, max tilt 0.0° | success, 50 steps, 0.0° |
+| `normal_into_slot` | success, 42 steps, 0.0° | success, 42 steps, 0.0° |
+| `slot_exit_right` | success, 74 steps, 7.4° (touched the right pillar, model tracked it) | success, 74 steps, 7.4° |
+| `outer_left_in` | **toppled**, 63 steps, 36.5° | toppled, 49 steps, 31.8° |
+| `outer_right_in` | **toppled**, 65 steps, 36.3° | toppled, 61 steps, 32.0° |
+| `outer_right_cross` | **timeout**, 800 steps, 21.0° (93 of 100 cycles: everything rejected, held) | toppled, 46 steps, 35.4° |
+
+Verdict line of the run: `with the model's safety check: 3 success / 2 toppled / 1 timeout / 0 lost_grasp; without it:
+3 success / 3 toppled / 0 timeout / 0 lost_grasp (over 6 tasks; safety from the model, progress geometric, no RRT tree /
+goal head)`. So the check made no difference on the three tasks whose straight line is clear or merely brushes a pillar
+(the same moves were chosen in both modes; in `slot_exit_right` a few candidates were vetoed during the 7° contact, but
+never the winning one), it turned one
+topple into a lock-in and it failed on the two tasks whose straight line runs through a pillar. The mechanism is visible
+in the run's own `cycles.csv` (the numbers below are from our run and are reproduced by running the demo) and is the one
+the project's pilot report describes: while the block is pushing the pillar, the model's
+**rollout under-predicts the tilt growth** — in `outer_left_in` the chosen edges were predicted at 10.4°, 10.9°,
+13.8°, 14.8°, 11.1°, 13.1°, 10.3° (all below the line, so accepted) while the true tilt after each edge was 7.2°, 9.0°,
+11.2°, 12.9°, 18.4°, 22.3°, 36.5°; the head's reading on the real frame lagged too (11.6° at a true 22.3°). Without the
+check the same planner chose edges the model predicted at 20–44° (it saw the danger and was not allowed to act on it)
+and toppled two cycles earlier; with the check it was steered onto the few edges the model under-predicted — the pilot
+report's "the planner picks the model's blind spots" reading. In `outer_right_cross` the check did fire: after six
+edges (true tilt 19.6°) hold itself was predicted at 28–31° and every edge at ≥ 22°, so the planner held for the
+remaining 93 cycles with the pillar leaning at 19.5–19.8° against the block, and timed out — the pilot's "all rejected,
+locked in" timeout (its start 32, outer_right, true tilt ≈ 20°). In the pilot the geometric signal's place was taken by a
+learned distance signal that on these outer starts under-estimated progress, so the pilot's outer failures were mostly
+timeouts; here the signal is exact and keeps reporting progress straight through the pillar, which is why the two
+"through" tasks end in topples instead. The comparison with the pilot's 16 / 3 / 9 (success / toppled / timeout over
+30 near-pillar starts) is therefore qualitative only: same safety mechanism, same action law, different progress
+signal, six hand-picked tasks instead of 30 sampled starts, no tree, no arrival classifier.
+
+**Runtime.** One decision (3 encodes, 33 nominal rollouts on the plant model, one batched 33 × 20 rollout, 660 head
+reads, selection) takes ~0.3 s on 4 CPU threads; an 8-step move with its three renders ~0.1 s. The whole default run
+(12 episodes, 1 416 control steps, 176 decisions) took 90 s wall, peak RSS 2.0 GB; the 800-step timeout episode alone
+40 s; the scripted starts (170–252 steps each) are included. `--gif` renders every step (~0.3 s per 8 steps more).
+
+**`--fallback retreat` (an experiment, not validated by the project).** When everything including hold is rejected,
+the pilot holds (and locks in, as above); with `--fallback retreat` the demo instead executes one 8-step edge that lifts
+the block and backs it away from the nearest pillar (`unit([0.5 · away_xy, 1])`), reason `all_rejected_retreat`. This
+is our idea for this demo; the project tested a different all-rejected rule (take the least-dangerous edge) on
+2026-10-09 and found no net gain, so nothing here is a recommendation. What it did in our run (`--tasks
+outer_right_cross,outer_right_in --fallback retreat`; `outer_left_in` has no all-rejected cycle, so the option cannot
+change it): `outer_right_in` went from toppled to **success** (394 steps, 49 cycles, max tilt 18.0°) — at the cycle
+where everything was rejected (true tilt 18.0°, hold predicted at 46.6°) the default hold had let the pillar fall
+(18° → 36° during the hold); the retreat edge instead brought it back to 14.5°, after which the planner held for
+32 cycles (no accepted edge improved the distance) and then found a way in at 8–13° predicted tilt. `outer_right_cross`
+stayed a **timeout** (4 retreats, max tilt 20.5°): after the retreats it settled into the other lock-in, 84 cycles of
+"no reducing edge" with the pillar leaning at 16° against the block — the edges the model accepts lead away from the
+goal and the edges that reduce the distance are vetoed. One task of two, one seed: an observation, not a result.
+
+**Limitations.** Six tasks and one seed; the near-pillar outcomes are decided by a handful of borderline predictions
+(10–15° predicted against a 15° line), so a different MuJoCo build, CPU or thread count can flip a decision and change
+an outcome — `--compare` quantifies the difference to our run, and two runs on one machine are bit-identical. The
+progress signal is privileged (simulator pinch position) and the arrival is geometric (the pinch, with the grip offset
+measured at lift, within 1.5 cm at 3 consecutive decisions, i.e. 0.8 s from the first to the last check and no speed
+test, where the scene judge requires 1 s at ≤ 2 cm/s — the block's own COM distance at the end is logged next to it: 0.38–0.43
+cm on the three successes, no "geometric false arrival"); the scene's hover judge, the distance head and the arrival
+classifier of the pilot are not used. "Tilt > 0 steps" counts control steps with any pillar tilt, i.e. contact, since
+the package scene does not expose the pilot's contact-force monitor. The `--fallback retreat` move is untested beyond
+this demo. The script is ~610 lines, numpy + the package loader + `env/rrt_action_law.py`; it needs both the simulator
+and the model stack in one Python (`quickstart.sh` installs both).
+
 ## Model
 
 | | |
@@ -228,7 +391,7 @@ Full records: `provenance/run.json` (every source with window counts, guard chec
 ## What it is good at — and not
 
 Independent read-out probes, fitted on each model's own real latents and read on its predicted latents, compared with
-the base model on identical anchors (`provenance/compare_wm_physical_s1_001_REPORT_ZH.md`; 15 pre-declared endpoints
+the base model on identical anchors (project-internal comparison report, not included here; 15 pre-declared endpoints
 with episode-bootstrap intervals, **all 15 better**):
 
 | open-loop rollout with the recorded actions | base | **S1** |

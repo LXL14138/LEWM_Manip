@@ -177,8 +177,14 @@ def load_model(args, lewm_s1):
 def simulate(args, letterbox):
     """Scripted grasp -> lift -> push -> hold in the live scene; returns the record (frames, commands, truth)."""
     import numpy as np
-    import mujoco
-    from three_block_scene import ThreeBlockScene
+    try:
+        import mujoco
+        from three_block_scene import ThreeBlockScene
+    except ImportError as exc:
+        raise ImportError(
+            f"{exc}: the simulator stack is not installed in this Python. From the package root run "
+            "`pip install -r env/requirements-env.txt` (mujoco, ogbench, stable-worldmodel at the pinned commit), "
+            "see README section 'Running the model in the simulator'") from exc
 
     env = ThreeBlockScene()
     _, info = env.reset(seed=0)

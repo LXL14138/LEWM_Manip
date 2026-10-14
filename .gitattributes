@@ -1,0 +1,7 @@
+# Keep every checkout byte-identical to the repository (LF line endings on every platform), so that
+# SHA256SUMS verifies and bash quickstart.sh runs even after a clone made with Git for Windows (core.autocrlf=true).
+* text=auto eol=lf
+*.pt binary
+*.npz binary
+*.png binary
+*.gif binary

@@ -545,3 +545,547 @@ given in advance) predicts at most 11 deg where the truth reaches 35 deg. Verdic
   1.48 GB (`/usr/bin/time -v`), `DEMO OK` with the same numbers as 9.3 (same phase bounds, MAEs and alarm steps);
   a second run with `--compare examples/env_demo_reference.npz` -> `max|delta raw_actions| 0.000e+00, |delta tilt|
   0.000e+00 deg, |delta pinch| 0.000e+00 m`, `DEMO OK`. The venv was deleted afterwards.
+
+## 10. quickstart.sh (2026-10-13)
+
+`quickstart.sh` (package root) does sections 1, 2, 3, 8 and 9.5 in one command and checks each step; `bash
+quickstart.sh --help` prints its header. The run documented below is the one of the final package state: a git
+repository was built from this package (`git init && git add -A && git commit`, so `.gitignore` and `.gitattributes`
+apply exactly as they do on GitHub: 34 tracked files), cloned to a fresh directory, and `bash quickstart.sh` was run
+there twice on this WSL2 Ubuntu 24.04 machine (2 CPU threads, `OMP_NUM_THREADS=2`, NVIDIA RTX 5080 used only by the
+EGL renderer, network available, pip cache warm from section 2's install): the first run from nothing (no `.venv`, no
+`le-wm`), the second run immediately afterwards to check that it is idempotent. Machine facts of the first run: Ubuntu
+24.04 has no `python3.10` on PATH and `uv` is not on PATH either but exists at `~/.local/bin/uv`, so step 1 picked
+the uv-provisioned CPython 3.10.21 (`/home/arrri/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/bin/python3.10`);
+the fresh venv was `/home/arrri/tmp_qs_fix2/pkg/.venv` (2.5 GB; 141 lines of `pip list`, 139 of `pip freeze`;
+`pip check` clean; torch 2.14.0+cpu); `le-wm` was cloned from GitHub (12 MB); the GL probe picked `egl` (first
+candidate; osmesa / glfw were not needed). Timings, first run: 82 s wall in total (`/usr/bin/time -v`: 1:21.44, peak
+RSS 1.75 GB) — packages 48 s (warm pip cache; ~3 min is to be expected with a cold cache), demo.py 6 s, simulator demo
+25 s. Second run: 35 s (`/usr/bin/time -v`: 34.99 s; packages 5 s = pip self-upgrade check + pin check, nothing
+installed; demo.py 6 s; simulator demo 24 s; output directory `env_demo_out_2` because `env_demo_out` existed). Both
+runs exit 0, `PASS` and `DEMO OK` with exactly the numbers of section 9.3. The clone, its venv and `le-wm` were deleted
+afterwards.
+
+Why 33 files in step 5 (section 8 says "every file"): the project-internal Chinese comparison report
+`provenance/compare_wm_physical_s1_001_REPORT_ZH.md` was removed from the public repository on 2026-10-08 (commit
+`e3f4500`), but the `SHA256SUMS` published with it still listed the file, so a clone of that state fails step 5 with
+`provenance/compare_wm_physical_s1_001_REPORT_ZH.md: FAILED open or read` (confirmed on 2026-10-13 with
+`git clone --depth 1` of GitHub: `sha256sum -c SHA256SUMS` exit 1). The fix follows that removal: the file is listed in
+`.gitignore` (it is not part of the release and is never committed again), `SHA256SUMS` was regenerated without it
+(33 entries, `LC_ALL=C` order, computed after the last edit of this file), and the three README mentions of the report
+were replaced ("project-internal comparison report, not included here"); the numbers quoted from it are unchanged.
+Regenerate `SHA256SUMS` after any further edit, from the package root:
+`find . -type f ! -name SHA256SUMS ! -path './.git/*' ! -path './.venv/*' ! -path './le-wm/*' ! -path '*/__pycache__/*'
+! -path './env_demo_out*' ! -path './provenance/compare_wm_physical_s1_001_REPORT_ZH.md' | sed 's|^\./||' |
+LC_ALL=C sort | xargs -d '\n' sha256sum > SHA256SUMS` (i.e. every file except the git-ignored ones).
+
+The script itself is unchanged since the checks made earlier the same day on a plain copy of the package (same
+machine): `--help` (exit 0); a copy of the script converted to CRLF line endings (`sed 's/$/\r/'`), which is what a
+clone made with Git for Windows and `core.autocrlf=true` would produce without the repository's `.gitattributes` — the
+script's first executable line reports `FAIL quickstart.sh has CRLF line endings (checked out with Git for Windows /
+core.autocrlf=true?) -> clone inside WSL or Linux, or run: git config core.autocrlf false && git checkout -- .   then
+re-run` and exits 1 before `set -u` can choke on the `\r`; the `.gitattributes` (`* text=auto eol=lf`, `*.pt *.npz
+*.png *.gif binary`) itself, by committing the text files of the package to a local git repository and cloning it with
+`git -c core.autocrlf=true clone`: with the `.gitattributes` every text file of the clone has 0 CR bytes and verifies
+against its checksums; the control clone of the same repository without it has CRLF in every text file
+(`quickstart.sh` 198 CR, `README.md` 297 CR), 12 checksum failures, and the script stops with the CRLF message above.
+On the previous revision of the script (steps 0–8 unchanged apart from the hint texts): running it from another
+directory (`FAIL ... not in the current directory`, exit 1); `le-wm` moved to an older commit, then `bash quickstart.sh
+--skip-install --no-sim` (step 3 printed `le-wm is at c8a44170..., checking out the pinned commit ...`, then `PASS`,
+8 s); `le-wm` without its `.git` (step 3 `FAIL ./le-wm exists but is not a git checkout -> rm -rf le-wm and re-run`,
+exit 1); `MUJOCO_GL=osmesa` exported on this machine without libOSMesa (step 7 `osmesa: no (AttributeError: 'NoneType'
+object has no attribute 'glGetError')`, `FAIL no working MuJoCo rendering backend (your exported MUJOCO_GL=osmesa
+fails; unset it to let the script probe)` with the apt hints, exit 1).
+
+Not tested: macOS (the `shasum -a 256` path, bash 3.2 — the script uses no bash-4 construct, and the `gtimeout` /
+no-`timeout` branches, which only print a note that a hanging step cannot be detected), `--cuda`, a machine without
+EGL (the osmesa / glfw fallbacks were only exercised through their failure path), and the `uv python install 3.10`
+branch (3.10 was already provisioned by uv here).
+
+First run, complete output (the per-step rows of the two demos are the ones of sections 3 and 9.2 and are trimmed
+with `[...]`; pip's only stderr line was `WARNING: typer 0.27.2 does not provide the extra 'all'`):
+
+```text
+$ git clone <this repository> /home/arrri/tmp_qs_fix2/pkg && cd /home/arrri/tmp_qs_fix2/pkg && bash quickstart.sh
+
+== [0] location check
+OK /home/arrri/tmp_qs_fix2/pkg
+
+== [1] Python 3.10
+OK /home/arrri/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/bin/python3.10  (CPython 3.10.21, uv)
+
+== [2] virtual environment ./.venv
+OK .venv/bin/python (CPython 3.10.21); the script calls .venv/bin/python directly, no activation needed
+
+== [3] upstream LeWM code ./le-wm: commit 8edfeb336732b5f3ce7b8b210d0ba370a09e2cac
+OK commit 8edfeb336732b5f3ce7b8b210d0ba370a09e2cac, fingerprinted files present and unmodified
+
+== [4] packages: torch CPU + requirements.txt + env/requirements-env.txt
+   not yet satisfied: hydra-core missing, omegaconf missing, antlr4-python3-runtime missing, einops missing, transformers missing, stable-pretraining missing, [...] lxml missing, dm-tree missing
+   pip install -r requirements.txt -r env/requirements-env.txt ...
+No broken requirements found.
+OK torch 2.14.0+cpu, 141 packages
+
+== [5] checksums: SHA256SUMS
+OK 33 files verified with sha256sum
+
+== [6] model demo: .venv/bin/python demo.py --upstream ./le-wm
+17:57:53 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+17:57:53 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+loaded WorldModel(latent_dim=192, history=3, image_size=224, control_dt=0.05, device=cpu, upstream_commit=8edfeb33, head=yes, encoder_builder='hydra') in 4.3 s
+  bundle   /home/arrri/tmp_qs_fix2/pkg/model_state.pt  sha256 bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e
+  upstream /home/arrri/tmp_qs_fix2/pkg/le-wm  fingerprints OK for commit 8edfeb336732b5f3ce7b8b210d0ba370a09e2cac
+  head     /home/arrri/tmp_qs_fix2/pkg/heads/tilt_head.pt  sha256 2ce0e4da4da19420a72077287cb0aa75c556cee54327758748c43d2c8e9c57b6  outputs ['tilt_deg / 30', 'unsafe_logit']  unsafe threshold 0.9608285427093506
+  torch 2.14.0+cpu  threads 2  device cpu  tf32 off
+example: cache wm_full_001 TRAIN episode 0, context frames 101..103, 24 future actions
+encoded 3 frames + 24-step rollout in 0.13 s; latent shape (24, 192)
+
+context frames (head on REAL latents):
+  frame | pred tilt deg | unsafe prob | true tilt deg
+    101 |        -0.324 |      0.0000 |         0.000
+[...]
+rollout (head on PREDICTED latents; threshold 0.9608285427093506):
+  step | frame | pred tilt deg | unsafe prob | true tilt deg | true unsafe
+     1 |   104 |        -0.176 |      0.0000 |         0.000 | False
+[...]
+    24 |   127 |         0.502 |      0.0000 |         0.000 | False
+
+reference: torch 2.14.0+cu130, 2 threads, cpu, hydra
+max|diff| context latents = 0.000e+00, rollout latents = 0.000e+00 (tolerance 0.0001)
+max|diff| predicted tilt deg vs reference = 0.000e+00
+PASS max|diff| ctx=0.000e+00 roll=0.000e+00 (tol 0.0001)
+OK PASS max|diff| ctx=0.000e+00 roll=0.000e+00 (tol 0.0001)
+
+== [7] MuJoCo rendering backend: probing egl, osmesa, glfw
+OK MUJOCO_GL=egl
+
+== [8] simulator demo: MUJOCO_GL=egl .venv/bin/python env/env_demo.py --upstream ./le-wm --out env_demo_out
+17:58:00 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+17:58:00 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+loaded WorldModel(latent_dim=192, history=3, image_size=224, control_dt=0.05, device=cpu, upstream_commit=8edfeb33, head=yes, encoder_builder='hydra') in 5.3 s
+  bundle   /home/arrri/tmp_qs_fix2/pkg/model_state.pt  sha256 bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e
+  head     /home/arrri/tmp_qs_fix2/pkg/heads/tilt_head.pt  sha256 2ce0e4da4da19420a72077287cb0aa75c556cee54327758748c43d2c8e9c57b6  unsafe threshold 0.9608285427093506
+17:58:00 | INFO  | __init__.py | Failed to load library ( 'libOpenGL.so.0' ): libOpenGL.so.0: cannot open shared object file: No such file or directory
+17:58:00 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+17:58:00 | INFO  | __init__.py | Failed to load library ( 'libOpenGL.so.0' ): libOpenGL.so.0: cannot open shared object file: No such file or directory
+17:58:00 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+17:58:00 | INFO  | __init__.py | Failed to load library ( 'libOpenGL.so.0' ): libOpenGL.so.0: cannot open shared object file: No such file or directory
+17:58:00 | INFO  | __init__.py | MuJoCo library version is: 3.11.0
+/home/arrri/tmp_qs_fix2/pkg/.venv/lib/python3.10/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+scene: control_dt=0.05, camera_fovy_deg=48.0, camera_pos_m=[0.70125, 0.0, 0.324], pillar_size_m=[0.04, 0.04, 0.1], pillar_mass_kg=0.19840000000000002, pillar_friction=[1.0, 0.005, 0.0001], shadows=False, unsafe_tilt_deg=30.0, physics_timestep=0.002, mujoco=3.11.0
+  SETTLE   steps   0.. 19 ( 20 steps, 1.00 s)  worst tilt   0.0 deg  pinch z 0.157 m  grasped=False
+  APPROACH steps  20.. 41 ( 22 steps, 1.10 s)  worst tilt   0.0 deg  pinch z 0.186 m  grasped=False
+  DESCEND  steps  42.. 86 ( 45 steps, 2.25 s)  worst tilt   0.0 deg  pinch z 0.057 m  grasped=False
+  CLOSE    steps  87.. 93 (  7 steps, 0.35 s)  worst tilt   0.0 deg  pinch z 0.055 m  grasped=True
+  LIFT     steps  94..113 ( 20 steps, 1.00 s)  worst tilt   0.0 deg  pinch z 0.101 m  grasped=True
+  PUSH     steps 114..141 ( 28 steps, 1.40 s)  worst tilt  30.6 deg  pinch z 0.106 m  grasped=True
+  HOLD     steps 142..161 ( 20 steps, 1.00 s)  worst tilt  35.4 deg  pinch z 0.104 m  grasped=True
+  sha256 raw_actions c363fd06d37cfe89...  tilt_deg 1afadda1e73c5e1d...
+simulation finished in 4.4 s: 162 steps, max true tilt 35.4 deg
+  torch 2.14.0+cpu  threads 2  device cpu  tf32 off  GL backend of the frames: egl
+encoded 163 frames in 2.6 s
+160 rollouts x 20 steps + one 48-step rollout from the first push step in 9.4 s
+
+phases: SETTLE 0..19 (20 steps, 1.00 s)  APPROACH 20..41 (22 steps, 1.10 s)  DESCEND 42..86 (45 steps, 2.25 s)  CLOSE 87..93 (7 steps, 0.35 s)  LIFT 94..113 (20 steps, 1.00 s)  PUSH 114..141 (28 steps, 1.40 s)  HOLD 142..161 (20 steps, 1.00 s)
+
+  t | phase    | cmd dy | true(t) | head(t) | pred t+1  / true  | pred t+5  / true  | pred t+10 / true  | pred t+20 / true  | p_unsafe(t+10)
+104 | LIFT     | -0.028 |     0.0 |    -0.0 |    -0.0 /     0.0 |    -0.1 /     0.0 |     0.2 /     0.0 |     0.2 /     2.6 | 0.000
+[...]
+161 | HOLD     | -0.015 |    35.4 |    38.7 |    38.5 /    35.4 |      -- /      -- |      -- /      -- |      -- /      -- |   --
+
+summary: true tilt first > 15 deg at step 134, > 22 at 138, > 30 at 142; max 35.4 deg; contact-free prefix 123 frames
+  MAE deg (all rows / true in [15,30) / truth growing): k=0: 0.87 / 3.02 / n/a  k=1: 0.83 / 2.55 / 2.60  k=5: 0.59 / 2.68 / 1.52  k=10: 1.18 / 2.98 / 3.73  k=20: 2.17 / 6.33 / 7.01
+  head on real latents: MAE 0.87 deg over all frames, 0.60 deg where the truth <= 30 deg; fallen tail (0 frames at ~90 deg) reads n/a deg at most
+  k= 1: pred >= 22 deg first at t=136, >= 30 at t=140, unsafe_prob >= threshold at t=143; lead over the true 30-deg crossing: 6 steps (0.30 s)
+  k= 5: pred >= 22 deg first at t=135, >= 30 at t=138, unsafe_prob >= threshold at t=None; lead over the true 30-deg crossing: 7 steps (0.35 s)
+  k=10: pred >= 22 deg first at t=129, >= 30 at t=131, unsafe_prob >= threshold at t=130; lead over the true 30-deg crossing: 13 steps (0.65 s)
+  k=20: pred >= 22 deg first at t=121, >= 30 at t=123, unsafe_prob >= threshold at t=130; lead over the true 30-deg crossing: 21 steps (1.05 s)
+  false-alarm check over the contact-free prefix: max predicted tilt 0.85 deg, max unsafe_prob 0.000
+  long open-loop rollout from step 114 (told the whole push in advance), predicted tilt every 5th step: 0 -1 1 5 8 5 6 5 4 4  (true: 0 0 4 11 17 26 34 35 35 35)
+wrote env_demo_out/summary.json, steps.csv, record.npz, strip.png, tilt_chart.png, rollout.gif  (21.8 s)
+DEMO OK: truth crossed 30 deg at step 142; the k=10 prediction reached 22 deg at step 129 (0.65 s ahead); no false alarm over the 123 contact-free frames (max predicted tilt 0.85 deg); head MAE on real latents 0.60 deg; MAE at k=10: 1.18 deg
+OK DEMO OK: truth crossed 30 deg at step 142; the k=10 prediction reached 22 deg at step 129 (0.65 s ahead); no f ...
+
+== summary (total 82 s)
+  location check               OK     0 s  /home/arrri/tmp_qs_fix2/pkg
+  Python 3.10                  OK     0 s  /home/arrri/.local/share/uv/python/cpython-3.10-linux-x86_64-gnu/bin/python3.10  (CPython 3.10.21, uv)
+  virtual environment ./.venv  OK     2 s  .venv/bin/python (CPython 3.10.21); the script calls .venv/bin/python directly, no activation needed
+  upstream LeWM code ./le-wm   OK     1 s  commit 8edfeb336732b5f3ce7b8b210d0ba370a09e2cac, fingerprinted files present and unmodified
+  packages                     OK    48 s  torch 2.14.0+cpu, 141 packages
+  checksums                    OK     0 s  33 files verified with sha256sum
+  model demo                   OK     6 s  PASS max|diff| ctx=0.000e+00 roll=0.000e+00 (tol 0.0001)
+  MuJoCo rendering backend     OK     0 s  MUJOCO_GL=egl
+  simulator demo               OK    25 s  DEMO OK: truth crossed 30 deg at step 142; the k=10 prediction reached 22 deg at step 129 (0.65 s ahead); no f ...
+  python: /home/arrri/tmp_qs_fix2/pkg/.venv/bin/python   upstream: /home/arrri/tmp_qs_fix2/pkg/le-wm
+  simulator outputs: /home/arrri/tmp_qs_fix2/pkg/env_demo_out  (summary.json, steps.csv, strip.png, tilt_chart.png, rollout.gif, record.npz)
+  view rollout.gif (WSL): explorer.exe env_demo_out
+ALL STEPS OK
+```
+
+Exit code 0. Second run (same directory, immediately afterwards; the demo outputs are identical to the first run and
+are omitted):
+
+```text
+$ bash quickstart.sh
+[...]
+== [1] Python 3.10
+OK .venv/bin/python  (CPython 3.10.21, existing .venv)
+[...]
+== [4] packages: torch CPU + requirements.txt + env/requirements-env.txt
+   torch 2.14.0+cpu already installed, keeping it
+   all pins already installed
+No broken requirements found.
+OK torch 2.14.0+cpu, 141 packages
+[...]
+== summary (total 35 s)
+  location check               OK     0 s  /home/arrri/tmp_qs_fix2/pkg
+  Python 3.10                  OK     0 s  .venv/bin/python  (CPython 3.10.21, existing .venv)
+  virtual environment ./.venv  OK     0 s  .venv/bin/python (CPython 3.10.21); the script calls .venv/bin/python directly, no activation needed
+  upstream LeWM code ./le-wm   OK     0 s  commit 8edfeb336732b5f3ce7b8b210d0ba370a09e2cac, fingerprinted files present and unmodified
+  packages                     OK     5 s  torch 2.14.0+cpu, 141 packages
+  checksums                    OK     0 s  33 files verified with sha256sum
+  model demo                   OK     6 s  PASS max|diff| ctx=0.000e+00 roll=0.000e+00 (tol 0.0001)
+  MuJoCo rendering backend     OK     0 s  MUJOCO_GL=egl
+  simulator demo               OK    24 s  DEMO OK: truth crossed 30 deg at step 142; the k=10 prediction reached 22 deg at step 129 (0.65 s ahead); no f ...
+  python: /home/arrri/tmp_qs_fix2/pkg/.venv/bin/python   upstream: /home/arrri/tmp_qs_fix2/pkg/le-wm
+  simulator outputs: /home/arrri/tmp_qs_fix2/pkg/env_demo_out_2  (summary.json, steps.csv, strip.png, tilt_chart.png, rollout.gif, record.npz)
+  view rollout.gif (WSL): explorer.exe env_demo_out_2
+ALL STEPS OK
+```
+
+Exit code 0.
+
+## 11. Closed-loop task demo (env/task_demo.py) — what was run (2026-10-14)
+
+`env/task_demo.py` (README "Running the model in a closed-loop task") needs the simulator and the model stack in one
+Python, which is what `quickstart.sh` builds, so it was verified on a fresh copy of the package with the package's own
+quickstart: the package directory was copied (`rsync -a`, excluding `.git`, `__pycache__`, `.venv`, `le-wm` and the
+demo output directories) to `/home/arrri/tmp_task_demo/pkg` on this WSL2 Ubuntu 24.04 machine (16 CPU threads, 15 GB
+RAM, NVIDIA RTX 5080 used only by the EGL renderer, network available), `bash quickstart.sh` was run there once (all
+steps OK, `PASS` and `DEMO OK` as in section 10, 82 s with a warm pip cache), and every run below used that copy's
+`.venv/bin/python` with `OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 PYTHONDONTWRITEBYTECODE=1 MUJOCO_GL=egl` exported and the
+demo's default `--threads 4`. `env/rrt_action_law.py` is the verbatim copy of the project's action law (sha256
+`513d5e41…`, recorded in `env/ENV_SOURCES.json`; the pilot's own `run.json` lists the same hash for the file it ran);
+the demo asserts at start-up that the bundle's action normalisation reproduces the pilot's WM-range env bounds
+(`max |diff| 0.0e+00`) and, on the first decision, that `lewm_s1.normalize_actions` equals `rrt_action_law.wm_normalize`
+bit for bit on the 33 × 20 nominal actions. The copy, its venv and its outputs were deleted afterwards.
+
+Commands (from the copy's package root):
+
+```bash
+rsync -a --exclude .git --exclude __pycache__ --exclude .venv --exclude le-wm --exclude "env_demo_out*" --exclude "task_demo_out*" \
+      /mnt/e/Codex/Summer2026/lewm-manip/exports/wm_S1_release_001/ /home/arrri/tmp_task_demo/pkg/
+cd /home/arrri/tmp_task_demo/pkg && bash quickstart.sh                                   # ALL STEPS OK (section 10)
+export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4 PYTHONDONTWRITEBYTECODE=1 MUJOCO_GL=egl
+/usr/bin/time -v .venv/bin/python env/task_demo.py --upstream ./le-wm --out task_demo_out_run3   # the shipped run
+/usr/bin/time -v .venv/bin/python env/task_demo.py --upstream ./le-wm --out task_demo_out_run4   # determinism re-run
+for d in task_demo_out_run3/*/; do b=$(basename "$d"); cmp task_demo_out_run3/$b/cycles.csv task_demo_out_run4/$b/cycles.csv \
+    && cmp task_demo_out_run3/$b/steps.csv task_demo_out_run4/$b/steps.csv && echo "$b: identical"; done
+/usr/bin/time -v .venv/bin/python env/task_demo.py --upstream ./le-wm --tasks outer_right_cross,outer_right_in \
+    --fallback retreat --gif --out task_demo_out_retreat                                 # the retreat experiment
+cp task_demo_out_run3/summary.json examples/task_demo_expected_summary.json
+.venv/bin/python env/task_demo.py --upstream ./le-wm --tasks normal_free,outer_right_in --out task_demo_out_cmp \
+    --compare examples/task_demo_expected_summary.json                                  # --compare exercised
+```
+
+Timings (`/usr/bin/time -v`): run 3 — 1:30.49 wall, 242 s user + 12 s system CPU, peak RSS 2.00 GB; run 4 — 1:26.08
+wall, 1.98 GB; the retreat run (two tasks, both modes, `--gif`) — 1:34.85 wall, 2.02 GB; the `--compare` run (two
+tasks) — 18.8 s. Inside run 3: the 800-step timeout episode 40 s, the other eleven 3–5 s each; median planning time per
+decision 0.27–0.31 s (3 encodes + 33 nominal rollouts + one 33 × 20 rollout + 660 head reads). An earlier revision of
+the script (identical decisions; only the stored arguments and the stdout buffering changed afterwards) had been run
+twice before (runs 1 and 2); all four runs have bit-identical `cycles.csv` and `steps.csv` in every episode.
+
+Shipped from run 3: `examples/task_demo_expected_summary.json` (its `summary.json`, 34 kB, no machine-specific paths),
+`examples/task_demo_strip_safety.png` and `examples/task_demo_strip_nosafety.png` (its two strips, 132 + 136 kB).
+
+Run 3, complete stdout (stderr held only the usual `ale-py` UserWarning of stable-worldmodel and the `/usr/bin/time`
+report):
+
+```text
+$ /usr/bin/time -v .venv/bin/python env/task_demo.py --upstream ./le-wm --out task_demo_out_run3
+09:30:13 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+09:30:13 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+loaded WorldModel(latent_dim=192, history=3, image_size=224, control_dt=0.05, device=cpu, upstream_commit=8edfeb33, head=yes, encoder_builder='hydra')
+  bundle sha256 bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e  head sha256 2ce0e4da4da19420a72077287cb0aa75c556cee54327758748c43d2c8e9c57b6
+  torch 2.14.0+cpu  threads 4  device cpu  tf32 off  mujoco 3.11.0  MUJOCO_GL=egl
+  action law: 2 cm/s, WM-range env bounds of the pilot reproduced from the bundle's normalisation (max |diff| 0.0e+00)
+  planner: {'n_directions': 32, 'direction_std': (1.0, 1.0, 0.5), 'tilt_line_deg': 15.0, 'edge_steps': 8, 'check_hold_steps': 12, 'score_step': 8, 'min_improvement_cm': 0.25, 'tie_cm': 0.05, 'arrival_cycles': 3, 'grip': 1.0}; arrival = pinch within 1.5 cm of goal + grip offset for 3 cycles; toppled > 30 deg; timeout 800 steps; fallback hold
+
+=== normal_free [normal] mode safety: start green (0.425, 0.0, 0.185) -> goal (0.455, 0.025, 0.165) (4.4 cm in free space above the pillars)
+  start ready after 170 scripted steps: green [0.423, 0.0006, 0.1811] (requested (0.425, 0.0, 0.185), off by 4.4 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.94 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   0.1 true now   0.0  dist  4.33 cm (green  4.32)  plan  321 ms
+  -> success after 50 steps / 6 cycles; max true tilt 0.0 deg; final distance pinch 0.44 cm, green COM 0.38 cm; reasons {'reduce': 5, 'no_reducing_edge': 1, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 4 s
+
+=== normal_into_slot [normal] mode safety: start green (0.425, 0.0, 0.19) -> goal (0.425, 0.0, 0.155) (3.5 cm straight down into the 1-cm slot; line clear, lateral error touches)
+  start ready after 176 scripted steps: green [0.4231, 0.0006, 0.186] (requested (0.425, 0.0, 0.19), off by 4.5 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.94 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   0.4 true now   0.0  dist  2.99 cm (green  2.93)  plan  320 ms
+  -> success after 42 steps / 5 cycles; max true tilt 0.0 deg; final distance pinch 0.55 cm, green COM 0.43 cm; reasons {'reduce': 4, 'no_reducing_edge': 1, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 3 s
+
+=== slot_exit_right [slot] mode safety: start green (0.425, 0.0, 0.125) -> goal (0.445, 0.03, 0.17) (5.0 cm; the straight line passes AGAINST the right pillar)
+  start ready after 219 scripted steps: green [0.4227, 0.0007, 0.1206] (requested (0.425, 0.0, 0.125), off by 5.0 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.93 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   0.5 true now   0.0  dist  6.23 cm (green  6.32)  plan  292 ms
+  -> success after 74 steps / 9 cycles; max true tilt 7.4 deg; final distance pinch 0.32 cm, green COM 0.40 cm; reasons {'reduce': 9, 'no_reducing_edge': 0, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 5 s
+
+=== outer_left_in [outer_left] mode safety: start green (0.425, -0.0975, 0.125) -> goal (0.425, -0.02, 0.17) (8.9 cm; the straight line runs THROUGH the left pillar)
+  start ready after 252 scripted steps: green [0.4228, -0.0963, 0.12] (requested (0.425, -0.0975, 0.125), off by 5.6 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.63 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   4.9 true now   0.0  dist  9.09 cm (green  9.17)  plan  315 ms
+  -> toppled after 63 steps / 8 cycles; max true tilt 36.5 deg; final distance pinch 3.63 cm, green COM 3.77 cm; reasons {'reduce': 8, 'no_reducing_edge': 0, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 4 s
+
+=== outer_right_in [outer_right] mode safety: start green (0.425, 0.0975, 0.125) -> goal (0.425, 0.02, 0.17) (8.9 cm; mirror of outer_left_in, through the right pillar)
+  start ready after 252 scripted steps: green [0.4224, 0.0977, 0.1198] (requested (0.425, 0.0975, 0.125), off by 5.8 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.78 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   0.9 true now   0.0  dist  9.27 cm (green  9.37)  plan  303 ms
+  -> toppled after 65 steps / 8 cycles; max true tilt 36.3 deg; final distance pinch 4.72 cm, green COM 4.84 cm; reasons {'reduce': 7, 'no_reducing_edge': 0, 'hold_rejected_escape': 0, 'all_rejected': 1, 'all_rejected_retreat': 0}; 4 s
+
+=== outer_right_cross [outer_right] mode safety: start green (0.425, 0.0975, 0.13) -> goal (0.41, -0.03, 0.16) (13.1 cm across both pillars; through the right pillar)
+  start ready after 247 scripted steps: green [0.4224, 0.0977, 0.1248] (requested (0.425, 0.0975, 0.13), off by 5.8 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.78 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   3.0 true now   0.0  dist 13.31 cm (green 13.35)  plan  295 ms
+  cycle  10 step  82  all_rejected          rejected 32/32 hold_ok 0  pred tilt chosen  26.9 true now  19.5  dist  9.83 cm (green  9.91)  plan  294 ms
+  cycle  20 step 162  all_rejected          rejected 32/32 hold_ok 0  pred tilt chosen  29.1 true now  19.7  dist  9.83 cm (green  9.93)  plan  293 ms
+  cycle  30 step 242  all_rejected          rejected 32/32 hold_ok 0  pred tilt chosen  29.9 true now  19.8  dist  9.83 cm (green  9.95)  plan  303 ms
+  cycle  40 step 322  all_rejected          rejected 32/32 hold_ok 0  pred tilt chosen  30.5 true now  19.8  dist  9.83 cm (green  9.96)  plan  318 ms
+  cycle  50 step 402  all_rejected          rejected 32/32 hold_ok 0  pred tilt chosen  30.4 true now  19.8  dist  9.83 cm (green  9.97)  plan  281 ms
+  cycle  60 step 482  all_rejected          rejected 32/32 hold_ok 0  pred tilt chosen  30.4 true now  19.8  dist  9.83 cm (green  9.97)  plan  284 ms
+  cycle  70 step 562  all_rejected          rejected 32/32 hold_ok 0  pred tilt chosen  30.7 true now  19.8  dist  9.83 cm (green  9.98)  plan  289 ms
+  cycle  80 step 642  all_rejected          rejected 32/32 hold_ok 0  pred tilt chosen  30.9 true now  19.8  dist  9.83 cm (green  9.98)  plan  298 ms
+  cycle  90 step 722  all_rejected          rejected 32/32 hold_ok 0  pred tilt chosen  31.2 true now  19.8  dist  9.83 cm (green  9.99)  plan  291 ms
+  -> timeout after 800 steps / 100 cycles; max true tilt 21.0 deg; final distance pinch 9.83 cm, green COM 9.99 cm; reasons {'reduce': 5, 'no_reducing_edge': 1, 'hold_rejected_escape': 1, 'all_rejected': 93, 'all_rejected_retreat': 0}; 40 s
+
+=== normal_free [normal] mode nosafety: start green (0.425, 0.0, 0.185) -> goal (0.455, 0.025, 0.165) (4.4 cm in free space above the pillars)
+  start ready after 170 scripted steps: green [0.423, 0.0006, 0.1811] (requested (0.425, 0.0, 0.185), off by 4.4 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.94 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   0.1 true now   0.0  dist  4.33 cm (green  4.32)  plan  317 ms
+  -> success after 50 steps / 6 cycles; max true tilt 0.0 deg; final distance pinch 0.44 cm, green COM 0.38 cm; reasons {'reduce': 5, 'no_reducing_edge': 1, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 3 s
+
+=== normal_into_slot [normal] mode nosafety: start green (0.425, 0.0, 0.19) -> goal (0.425, 0.0, 0.155) (3.5 cm straight down into the 1-cm slot; line clear, lateral error touches)
+  start ready after 176 scripted steps: green [0.4231, 0.0006, 0.186] (requested (0.425, 0.0, 0.19), off by 4.5 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.94 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   0.4 true now   0.0  dist  2.99 cm (green  2.93)  plan  279 ms
+  -> success after 42 steps / 5 cycles; max true tilt 0.0 deg; final distance pinch 0.55 cm, green COM 0.43 cm; reasons {'reduce': 4, 'no_reducing_edge': 1, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 3 s
+
+=== slot_exit_right [slot] mode nosafety: start green (0.425, 0.0, 0.125) -> goal (0.445, 0.03, 0.17) (5.0 cm; the straight line passes AGAINST the right pillar)
+  start ready after 219 scripted steps: green [0.4227, 0.0007, 0.1206] (requested (0.425, 0.0, 0.125), off by 5.0 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.93 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   0.5 true now   0.0  dist  6.23 cm (green  6.32)  plan  307 ms
+  -> success after 74 steps / 9 cycles; max true tilt 7.4 deg; final distance pinch 0.32 cm, green COM 0.40 cm; reasons {'reduce': 9, 'no_reducing_edge': 0, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 5 s
+
+=== outer_left_in [outer_left] mode nosafety: start green (0.425, -0.0975, 0.125) -> goal (0.425, -0.02, 0.17) (8.9 cm; the straight line runs THROUGH the left pillar)
+  start ready after 252 scripted steps: green [0.4228, -0.0963, 0.12] (requested (0.425, -0.0975, 0.125), off by 5.6 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.63 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   4.9 true now   0.0  dist  9.09 cm (green  9.17)  plan  297 ms
+  -> toppled after 49 steps / 6 cycles; max true tilt 31.8 deg; final distance pinch 4.69 cm, green COM 4.84 cm; reasons {'reduce': 6, 'no_reducing_edge': 0, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 4 s
+
+=== outer_right_in [outer_right] mode nosafety: start green (0.425, 0.0975, 0.125) -> goal (0.425, 0.02, 0.17) (8.9 cm; mirror of outer_left_in, through the right pillar)
+  start ready after 252 scripted steps: green [0.4224, 0.0977, 0.1198] (requested (0.425, 0.0975, 0.125), off by 5.8 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.78 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   0.9 true now   0.0  dist  9.27 cm (green  9.37)  plan  308 ms
+  -> toppled after 61 steps / 8 cycles; max true tilt 32.0 deg; final distance pinch 3.79 cm, green COM 3.93 cm; reasons {'reduce': 8, 'no_reducing_edge': 0, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 4 s
+
+=== outer_right_cross [outer_right] mode nosafety: start green (0.425, 0.0975, 0.13) -> goal (0.41, -0.03, 0.16) (13.1 cm across both pillars; through the right pillar)
+  start ready after 247 scripted steps: green [0.4224, 0.0977, 0.1248] (requested (0.425, 0.0975, 0.13), off by 5.8 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.78 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   3.0 true now   0.0  dist 13.31 cm (green 13.35)  plan  305 ms
+  -> toppled after 46 steps / 6 cycles; max true tilt 35.4 deg; final distance pinch 9.07 cm, green COM 9.13 cm; reasons {'reduce': 6, 'no_reducing_edge': 0, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 3 s
+
+task               | mode     | outcome    | steps | max true tilt | tilt>0 steps | all-rejected cycles
+------------------------------------------------------------------------------------------------
+normal_free        | safety   | success    |    50 |           0.0 |            0 | 0
+normal_into_slot   | safety   | success    |    42 |           0.0 |            0 | 0
+slot_exit_right    | safety   | success    |    74 |           7.4 |           42 | 0
+outer_left_in      | safety   | toppled    |    63 |          36.5 |           56 | 0
+outer_right_in     | safety   | toppled    |    65 |          36.3 |           51 | 1
+outer_right_cross  | safety   | timeout    |   800 |          21.0 |          792 | 93
+normal_free        | nosafety | success    |    50 |           0.0 |            0 | 0
+normal_into_slot   | nosafety | success    |    42 |           0.0 |            0 | 0
+slot_exit_right    | nosafety | success    |    74 |           7.4 |           42 | 0
+outer_left_in      | nosafety | toppled    |    49 |          31.8 |           42 | 0
+outer_right_in     | nosafety | toppled    |    61 |          32.0 |           47 | 0
+outer_right_cross  | nosafety | toppled    |    46 |          35.4 |           38 | 0
+
+task               | with safety check              | without (--no-safety)
+--------------------------------------------------------------------------------
+normal_free        | success (50 steps, 0.0 deg)    | success (50 steps, 0.0 deg)
+normal_into_slot   | success (42 steps, 0.0 deg)    | success (42 steps, 0.0 deg)
+slot_exit_right    | success (74 steps, 7.4 deg)    | success (74 steps, 7.4 deg)
+outer_left_in      | toppled (63 steps, 36.5 deg)   | toppled (49 steps, 31.8 deg)
+outer_right_in     | toppled (65 steps, 36.3 deg)   | toppled (61 steps, 32.0 deg)
+outer_right_cross  | timeout (800 steps, 21.0 deg)  | toppled (46 steps, 35.4 deg)
+
+with the model's safety check: 3 success / 2 toppled / 1 timeout / 0 lost_grasp; without it: 3 success / 3 toppled / 0 timeout / 0 lost_grasp (over 6 tasks; safety from the model, progress geometric, no RRT tree / goal head)
+wrote task_demo_out_run3/summary.json, strip_*.png and one directory per task x mode (86.4 s)
+	Command being timed: ".venv/bin/python env/task_demo.py --upstream ./le-wm --out task_demo_out_run3"
+	User time (seconds): 242.18
+	System time (seconds): 12.45
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:30.49
+	Maximum resident set size (kbytes): 1996844
+	Exit status: 0
+```
+
+Exit code 0. Run 4 (same command, `--out task_demo_out_run4`) printed the same lines apart from the planning
+milliseconds and the per-episode seconds (1:26.08 wall, peak RSS 1 982 016 kB); the determinism check:
+
+```text
+normal_free_nosafety: cycles.csv and steps.csv identical
+normal_free_safety: cycles.csv and steps.csv identical
+normal_into_slot_nosafety: cycles.csv and steps.csv identical
+normal_into_slot_safety: cycles.csv and steps.csv identical
+outer_left_in_nosafety: cycles.csv and steps.csv identical
+outer_left_in_safety: cycles.csv and steps.csv identical
+outer_right_cross_nosafety: cycles.csv and steps.csv identical
+outer_right_cross_safety: cycles.csv and steps.csv identical
+outer_right_in_nosafety: cycles.csv and steps.csv identical
+outer_right_in_safety: cycles.csv and steps.csv identical
+slot_exit_right_nosafety: cycles.csv and steps.csv identical
+slot_exit_right_safety: cycles.csv and steps.csv identical
+```
+
+(`sha256sum` of the twelve `cycles.csv` of run 3: `61b26024…` for both `normal_free` episodes, `9446cf5b…` for both
+`normal_into_slot` episodes — the two modes took identical decisions there — `268c7414…` / `c6e8377a…` for
+`slot_exit_right` safety / nosafety (same decisions, different accepted-candidate counts), `53aefd31…` / `a21d0d70…`
+for `outer_left_in`, `2a7b85de…` / `fc6687f5…` for `outer_right_in`, `7c5e4061…` / `ed2c64c1…` for
+`outer_right_cross`; runs 1, 2 and 4 reproduce every one of them.)
+
+The `--fallback retreat` experiment (README; stdout, the two INFO lines at the top trimmed):
+
+```text
+$ /usr/bin/time -v .venv/bin/python env/task_demo.py --upstream ./le-wm --tasks outer_right_cross,outer_right_in --fallback retreat --gif --out task_demo_out_retreat
+[...]
+  planner: {'n_directions': 32, 'direction_std': (1.0, 1.0, 0.5), 'tilt_line_deg': 15.0, 'edge_steps': 8, 'check_hold_steps': 12, 'score_step': 8, 'min_improvement_cm': 0.25, 'tie_cm': 0.05, 'arrival_cycles': 3, 'grip': 1.0}; arrival = pinch within 1.5 cm of goal + grip offset for 3 cycles; toppled > 30 deg; timeout 800 steps; fallback retreat
+
+=== outer_right_in [outer_right] mode safety: start green (0.425, 0.0975, 0.125) -> goal (0.425, 0.02, 0.17) (8.9 cm; mirror of outer_left_in, through the right pillar)
+  start ready after 252 scripted steps: green [0.4224, 0.0977, 0.1198] (requested (0.425, 0.0975, 0.125), off by 5.8 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.78 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   0.9 true now   0.0  dist  9.27 cm (green  9.37)  plan  309 ms
+  cycle  10 step  82  no_reducing_edge      rejected 16/32 hold_ok 1  pred tilt chosen  13.0 true now  14.5  dist  4.81 cm (green  4.90)  plan  294 ms
+  cycle  20 step 162  no_reducing_edge      rejected  9/32 hold_ok 1  pred tilt chosen  13.5 true now  14.5  dist  4.81 cm (green  4.92)  plan  283 ms
+  cycle  30 step 242  no_reducing_edge      rejected 14/32 hold_ok 1  pred tilt chosen  13.9 true now  14.5  dist  4.81 cm (green  4.94)  plan  326 ms
+  cycle  40 step 322  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   8.2 true now  10.3  dist  5.57 cm (green  5.67)  plan  285 ms
+  -> success after 394 steps / 49 cycles; max true tilt 18.0 deg; final distance pinch 0.41 cm, green COM 0.69 cm; reasons {'reduce': 14, 'no_reducing_edge': 32, 'hold_rejected_escape': 2, 'all_rejected': 0, 'all_rejected_retreat': 1}; 25 s
+
+=== outer_right_cross [outer_right] mode safety: start green (0.425, 0.0975, 0.13) -> goal (0.41, -0.03, 0.16) (13.1 cm across both pillars; through the right pillar)
+  start ready after 247 scripted steps: green [0.4224, 0.0977, 0.1248] (requested (0.425, 0.0975, 0.13), off by 5.8 mm), grip offset [-0.0002, 0.0004, 0.0083], max pillar tilt during the start 0.000 deg, nearest pillar 4.78 cm
+  cycle   0 step   2  reduce                rejected  0/32 hold_ok 1  pred tilt chosen   3.0 true now   0.0  dist 13.31 cm (green 13.35)  plan  317 ms
+  cycle  10 step  82  no_reducing_edge      rejected 14/32 hold_ok 1  pred tilt chosen  12.1 true now  15.4  dist  9.93 cm (green  9.98)  plan  284 ms
+  cycle  20 step 162  no_reducing_edge      rejected 16/32 hold_ok 1  pred tilt chosen   8.2 true now  16.2  dist 10.18 cm (green 10.20)  plan  304 ms
+  cycle  30 step 242  no_reducing_edge      rejected 13/32 hold_ok 1  pred tilt chosen   8.3 true now  16.2  dist 10.17 cm (green 10.19)  plan  287 ms
+  cycle  40 step 322  no_reducing_edge      rejected 10/32 hold_ok 1  pred tilt chosen   8.3 true now  16.2  dist 10.17 cm (green 10.19)  plan  312 ms
+  cycle  50 step 402  no_reducing_edge      rejected 17/32 hold_ok 1  pred tilt chosen   8.5 true now  16.1  dist 10.17 cm (green 10.19)  plan  308 ms
+  cycle  60 step 482  no_reducing_edge      rejected 18/32 hold_ok 1  pred tilt chosen   8.5 true now  16.1  dist 10.17 cm (green 10.19)  plan  313 ms
+  cycle  70 step 562  no_reducing_edge      rejected 17/32 hold_ok 1  pred tilt chosen   8.8 true now  16.1  dist 10.17 cm (green 10.19)  plan  294 ms
+  cycle  80 step 642  no_reducing_edge      rejected 15/32 hold_ok 1  pred tilt chosen   9.1 true now  16.1  dist 10.17 cm (green 10.19)  plan  276 ms
+  cycle  90 step 722  no_reducing_edge      rejected 15/32 hold_ok 1  pred tilt chosen   9.6 true now  16.0  dist 10.17 cm (green 10.20)  plan  288 ms
+  -> timeout after 800 steps / 100 cycles; max true tilt 20.5 deg; final distance pinch 10.17 cm, green COM 10.20 cm; reasons {'reduce': 9, 'no_reducing_edge': 84, 'hold_rejected_escape': 3, 'all_rejected': 0, 'all_rejected_retreat': 4}; 49 s
+
+=== outer_right_in [outer_right] mode nosafety: [...]
+  -> toppled after 61 steps / 8 cycles; max true tilt 32.0 deg; final distance pinch 3.79 cm, green COM 3.93 cm; reasons {'reduce': 8, 'no_reducing_edge': 0, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 5 s
+
+=== outer_right_cross [outer_right] mode nosafety: [...]
+  -> toppled after 46 steps / 6 cycles; max true tilt 35.4 deg; final distance pinch 9.07 cm, green COM 9.13 cm; reasons {'reduce': 6, 'no_reducing_edge': 0, 'hold_rejected_escape': 0, 'all_rejected': 0, 'all_rejected_retreat': 0}; 4 s
+
+task               | mode     | outcome    | steps | max true tilt | tilt>0 steps | all-rejected cycles
+------------------------------------------------------------------------------------------------
+outer_right_in     | safety   | success    |   394 |          18.0 |          380 | 1
+outer_right_cross  | safety   | timeout    |   800 |          20.5 |          792 | 4
+outer_right_in     | nosafety | toppled    |    61 |          32.0 |           47 | 0
+outer_right_cross  | nosafety | toppled    |    46 |          35.4 |           38 | 0
+
+task               | with safety check              | without (--no-safety)
+--------------------------------------------------------------------------------
+outer_right_in     | success (394 steps, 18.0 deg)  | toppled (61 steps, 32.0 deg)
+outer_right_cross  | timeout (800 steps, 20.5 deg)  | toppled (46 steps, 35.4 deg)
+
+with the model's safety check: 1 success / 0 toppled / 1 timeout / 0 lost_grasp; without it: 0 success / 2 toppled / 0 timeout / 0 lost_grasp (over 2 tasks; safety from the model, progress geometric, no RRT tree / goal head)
+wrote task_demo_out_retreat/summary.json, strip_*.png and one directory per task x mode (92.4 s)
+```
+
+Exit code 0 (1:34.85 wall, peak RSS 2 024 352 kB; the two nosafety episodes are the ones of run 3, bit for bit, since
+nothing is rejected without the check; `--gif` wrote a 364 kB `rollout.gif` for the 46-step episode and 2.6 MB for the
+800-step one, with a `final.png` each). The decisive cycle of `outer_right_in` in its `cycles.csv`: cycle 7 (step 58,
+true tilt 18.0°, hold predicted 46.6°, every edge ≥ 15.6°) executed `all_rejected_retreat` and the true tilt over the
+8 steps stayed at 17.8°, then 14.5° at the next decision; in run 3 the same cycle held and the pillar went 18.0° → 36.3°.
+
+`--compare` exercised on a two-task run against the shipped summary (stdout tail; the four episodes match):
+
+```text
+$ .venv/bin/python env/task_demo.py --upstream ./le-wm --tasks normal_free,outer_right_in --out task_demo_out_cmp --compare examples/task_demo_expected_summary.json
+[...]
+with the model's safety check: 1 success / 1 toppled / 0 timeout / 0 lost_grasp; without it: 1 success / 1 toppled / 0 timeout / 0 lost_grasp (over 2 tasks; safety from the model, progress geometric, no RRT tree / goal head)
+wrote task_demo_out_cmp/summary.json, strip_*.png and one directory per task x mode (18.8 s)
+
+compare with examples/task_demo_expected_summary.json (informational; MuJoCo contact events and borderline 15-deg decisions depend on the build / CPU):
+  normal_free        safety  : outcome success vs success, steps 50 vs 50, max tilt 0.0 vs 0.0 deg  SAME
+  outer_right_in     safety  : outcome toppled vs toppled, steps 65 vs 65, max tilt 36.3 vs 36.3 deg  SAME
+  normal_free        nosafety: outcome success vs success, steps 50 vs 50, max tilt 0.0 vs 0.0 deg  SAME
+  outer_right_in     nosafety: outcome toppled vs toppled, steps 61 vs 61, max tilt 32.0 vs 32.0 deg  SAME
+```
+
+Not tested: another machine or thread count (the README explains why a borderline 15° decision can flip there), `--device
+cuda`, `--encoder-builder transformers` with this script (the loader path is the one demo.py verified), `--seed` other
+than 0, and `--fallback retreat` on `outer_left_in` (it has no all-rejected cycle, so the option cannot change it).
+
+### 11.1 SHA256SUMS regenerated, and the whole thing re-run on a second fresh copy (2026-10-14)
+
+The runs above were made with the `SHA256SUMS` of section 10, i.e. before the files of this section were added. A
+review of that state found what it implies: `README.md`, `RUNNING.md`, `.gitignore` and `env/ENV_SOURCES.json` had been
+edited and `env/task_demo.py`, `env/rrt_action_law.py` and the three `examples/task_demo_*` files were not listed, so a
+clone of it fails `quickstart.sh` at step 5 before any demo runs. Confirmed on the package itself and on a second fresh
+copy (`/home/arrri/tmp_task_fix1/pkg`, same rsync as above):
+
+```text
+$ sha256sum -c SHA256SUMS | grep -v ': OK$'
+.gitignore: FAILED
+README.md: FAILED
+RUNNING.md: FAILED
+env/ENV_SOURCES.json: FAILED
+sha256sum: WARNING: 4 computed checksums did NOT match
+```
+
+Fix: `SHA256SUMS` regenerated with the section-10 command, with `task_demo_out*` added to the exclusions because
+`.gitignore` now lists it (the real package contains no such directory; the exclusion only keeps the rule in step with
+`.gitignore`):
+
+```bash
+find . -type f ! -name SHA256SUMS ! -path './.git/*' ! -path './.venv/*' ! -path './le-wm/*' ! -path '*/__pycache__/*' \
+     ! -path './env_demo_out*' ! -path './task_demo_out*' ! -path './provenance/compare_wm_physical_s1_001_REPORT_ZH.md' \
+     | sed 's|^\./||' | LC_ALL=C sort | xargs -d '\n' sha256sum > SHA256SUMS
+```
+
+Result: 38 entries (33 + the five new files), `sha256sum -c SHA256SUMS` exit 0. With that file the copy's
+`bash quickstart.sh` passed again from scratch (fresh venv, fresh `le-wm` clone; 79 s wall with a warm pip cache,
+`/usr/bin/time -v` 1:18.50, peak RSS 1.75 GB): `OK 38 files verified with sha256sum`, `PASS max|diff| ctx=0.000e+00
+roll=0.000e+00`, `DEMO OK: truth crossed 30 deg at step 142; the k=10 prediction reached 22 deg at step 129 (0.65 s
+ahead); …` (the numbers of section 9.3), `ALL STEPS OK`. The shipped `SHA256SUMS` of the package is the same
+regeneration run from the package root after the last edit of this file, so its `RUNNING.md` line differs from the copy's
+(that is the only line that can); it was then verified with `sha256sum -c` (38 OK) and with a second `bash quickstart.sh`
+on the same copy, which by construction cannot be quoted here.
+
+Then the full default task-demo run was repeated on that copy, twice, with `--compare` against the shipped summary
+(same exports and `--threads 4` as above):
+
+```bash
+cd /home/arrri/tmp_task_fix1/pkg
+/usr/bin/time -v .venv/bin/python env/task_demo.py --upstream ./le-wm --out task_demo_out --compare examples/task_demo_expected_summary.json
+/usr/bin/time -v .venv/bin/python env/task_demo.py --upstream ./le-wm --out task_demo_out_2
+for d in task_demo_out/*/; do b=$(basename "$d"); cmp task_demo_out/$b/cycles.csv task_demo_out_2/$b/cycles.csv \
+    && cmp task_demo_out/$b/steps.csv task_demo_out_2/$b/steps.csv && echo "$b: identical"; done
+```
+
+Both runs exit 0 (1:27.14 wall, peak RSS 2.16 GB; 1:30.75 wall, 2.22 GB), their `cycles.csv` and `steps.csv` are
+bit-identical in all twelve episodes, and `outer_right_cross_safety/cycles.csv` has the same sha256 as in runs 1–4
+(`7c5e4061aa99…`). The stdout of the first run is that of run 3 above line for line, apart from the timings (`plan`
+milliseconds, episode seconds, `84.3 s` in the `wrote` line) and the output directory name; its tables and verdict line
+are identical, and `--compare` reports `SAME` for every task × mode:
+
+```text
+compare with examples/task_demo_expected_summary.json (informational; MuJoCo contact events and borderline 15-deg decisions depend on the build / CPU):
+  normal_free        safety  : outcome success vs success, steps 50 vs 50, max tilt 0.0 vs 0.0 deg  SAME
+  normal_into_slot   safety  : outcome success vs success, steps 42 vs 42, max tilt 0.0 vs 0.0 deg  SAME
+  slot_exit_right    safety  : outcome success vs success, steps 74 vs 74, max tilt 7.4 vs 7.4 deg  SAME
+  outer_left_in      safety  : outcome toppled vs toppled, steps 63 vs 63, max tilt 36.5 vs 36.5 deg  SAME
+  outer_right_in     safety  : outcome toppled vs toppled, steps 65 vs 65, max tilt 36.3 vs 36.3 deg  SAME
+  outer_right_cross  safety  : outcome timeout vs timeout, steps 800 vs 800, max tilt 21.0 vs 21.0 deg  SAME
+  normal_free        nosafety: outcome success vs success, steps 50 vs 50, max tilt 0.0 vs 0.0 deg  SAME
+  normal_into_slot   nosafety: outcome success vs success, steps 42 vs 42, max tilt 0.0 vs 0.0 deg  SAME
+  slot_exit_right    nosafety: outcome success vs success, steps 74 vs 74, max tilt 7.4 vs 7.4 deg  SAME
+  outer_left_in      nosafety: outcome toppled vs toppled, steps 49 vs 49, max tilt 31.8 vs 31.8 deg  SAME
+  outer_right_in     nosafety: outcome toppled vs toppled, steps 61 vs 61, max tilt 32.0 vs 32.0 deg  SAME
+  outer_right_cross  nosafety: outcome toppled vs toppled, steps 46 vs 46, max tilt 35.4 vs 35.4 deg  SAME
+```
+
+A field-by-field diff of the new `summary.json` against the shipped `examples/task_demo_expected_summary.json` shows only
+`arguments.out`, `arguments.compare`, the per-episode `episode_s` / `plan_s_median` and `runtime_s` (84.3 vs 86.4 s);
+the two strip PNGs are byte-identical to the shipped ones. The shipped example files were therefore left as they are. The
+second copy, its venv and its outputs were deleted afterwards.

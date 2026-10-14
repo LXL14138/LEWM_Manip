@@ -222,12 +222,17 @@ def _load_head(path, bundle_sha256, upstream_sha256, device):
 def _check_upstream(upstream_dir, expected):
     """Fingerprint the three upstream files; raise a clear error naming the expected commit on any difference."""
     upstream_dir = Path(upstream_dir).expanduser().resolve()
+    clone_hint = f"git clone {UPSTREAM_REPO} && git -C le-wm checkout {UPSTREAM_COMMIT}"
+    if not upstream_dir.is_dir():
+        raise FileNotFoundError(
+            f"--upstream directory {upstream_dir} does not exist. Step 1 of the README has not been done: run, from "
+            f"the package root, {clone_hint}")
     for relative in UPSTREAM_FILES:
         if not (upstream_dir / relative).is_file():
             raise FileNotFoundError(
-                f"Missing upstream LeWM file {upstream_dir / relative}. --upstream must point at a checkout of "
-                f"{UPSTREAM_REPO} at commit {UPSTREAM_COMMIT}: git clone {UPSTREAM_REPO} && "
-                f"git -C le-wm checkout {UPSTREAM_COMMIT}")
+                f"{upstream_dir} exists but has no {relative}, so it is not a checkout of {UPSTREAM_REPO} at commit "
+                f"{UPSTREAM_COMMIT} (an empty or interrupted clone, or the wrong directory). Remove it and run "
+                f"{clone_hint}")
     fingerprints = {relative: sha256_file(upstream_dir / relative) for relative in UPSTREAM_FILES}
     if expected is not None and fingerprints != dict(expected):
         differing = [f"{rel} (expected sha256 {expected.get(rel)}, found {fingerprints[rel]})"

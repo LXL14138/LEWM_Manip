@@ -1,0 +1,1368 @@
+{
+  "format": "task_demo_v1",
+  "runtime_s": 86.4,
+  "arguments": {
+    "upstream": "le-wm",
+    "bundle": "model_state.pt",
+    "head": "heads/tilt_head.pt",
+    "encoder_builder": "hydra",
+    "tasks": "all",
+    "no_safety": false,
+    "out": "task_demo_out_run3",
+    "device": "cpu",
+    "threads": 4,
+    "gif": false,
+    "max_steps": 800,
+    "seed": 0,
+    "compare": null,
+    "fallback": "hold"
+  },
+  "tasks": [
+    {
+      "name": "normal_free",
+      "group": "normal",
+      "start": [
+        0.425,
+        0.0,
+        0.185
+      ],
+      "goal": [
+        0.455,
+        0.025,
+        0.165
+      ],
+      "note": "4.4 cm in free space above the pillars"
+    },
+    {
+      "name": "normal_into_slot",
+      "group": "normal",
+      "start": [
+        0.425,
+        0.0,
+        0.19
+      ],
+      "goal": [
+        0.425,
+        0.0,
+        0.155
+      ],
+      "note": "3.5 cm straight down into the 1-cm slot; line clear, lateral error touches"
+    },
+    {
+      "name": "slot_exit_right",
+      "group": "slot",
+      "start": [
+        0.425,
+        0.0,
+        0.125
+      ],
+      "goal": [
+        0.445,
+        0.03,
+        0.17
+      ],
+      "note": "5.0 cm; the straight line passes AGAINST the right pillar"
+    },
+    {
+      "name": "outer_left_in",
+      "group": "outer_left",
+      "start": [
+        0.425,
+        -0.0975,
+        0.125
+      ],
+      "goal": [
+        0.425,
+        -0.02,
+        0.17
+      ],
+      "note": "8.9 cm; the straight line runs THROUGH the left pillar"
+    },
+    {
+      "name": "outer_right_in",
+      "group": "outer_right",
+      "start": [
+        0.425,
+        0.0975,
+        0.125
+      ],
+      "goal": [
+        0.425,
+        0.02,
+        0.17
+      ],
+      "note": "8.9 cm; mirror of outer_left_in, through the right pillar"
+    },
+    {
+      "name": "outer_right_cross",
+      "group": "outer_right",
+      "start": [
+        0.425,
+        0.0975,
+        0.13
+      ],
+      "goal": [
+        0.41,
+        -0.03,
+        0.16
+      ],
+      "note": "13.1 cm across both pillars; through the right pillar"
+    }
+  ],
+  "planner": {
+    "n_directions": 32,
+    "direction_std": [
+      1.0,
+      1.0,
+      0.5
+    ],
+    "tilt_line_deg": 15.0,
+    "edge_steps": 8,
+    "check_hold_steps": 12,
+    "score_step": 8,
+    "min_improvement_cm": 0.25,
+    "tie_cm": 0.05,
+    "arrival_cycles": 3,
+    "grip": 1.0
+  },
+  "arrive_m": 0.015,
+  "topple_deg": 30.0,
+  "versions": {
+    "torch": "2.14.0+cpu",
+    "numpy": "2.2.6",
+    "mujoco": "3.11.0",
+    "gl": "egl",
+    "threads": 4
+  },
+  "bundle_sha256": "bd7bc284bade0a971ae1a29a2141c4141e24e6e9bde1ecadf9471be9ba45e98e",
+  "head_sha256": "2ce0e4da4da19420a72077287cb0aa75c556cee54327758748c43d2c8e9c57b6",
+  "episodes": [
+    {
+      "task": "normal_free",
+      "group": "normal",
+      "mode": "safety",
+      "safety": true,
+      "fallback": "hold",
+      "outcome": "success",
+      "steps": 50,
+      "cycles": 6,
+      "max_true_tilt_deg": 0.0,
+      "contact_steps_tilt_gt_0": 0,
+      "disturbed_ge_10deg": false,
+      "all_rejected_cycles": 0,
+      "reason_counts": {
+        "reduce": 5,
+        "no_reducing_edge": 1,
+        "hold_rejected_escape": 0,
+        "all_rejected": 0,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": null,
+      "final_dist_pinch_cm": 0.437435280590706,
+      "final_dist_green_cm": 0.3828058919398862,
+      "green_within_tolerance_at_end": true,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 0.3887998669831961,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          0.0,
+          0.185
+        ],
+        "green_achieved_m": [
+          0.42303856345189517,
+          0.0006439540322560035,
+          0.18107592019004262
+        ],
+        "pose_error_mm": 4.433995092782044,
+        "pinch_m": [
+          0.4228349695004526,
+          0.0010897369840858957,
+          0.1898004883631332
+        ],
+        "steps": 170,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            144
+          ],
+          "DESCEND_START": [
+            144,
+            150
+          ],
+          "SETTLE_START": [
+            150,
+            170
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.939500487804713
+      },
+      "goal_green_m": [
+        0.455,
+        0.025,
+        0.165
+      ],
+      "pinch_goal_m": [
+        0.4547849764338844,
+        0.025443606070270085,
+        0.17333127305936147
+      ],
+      "start_goal_distance_cm": 4.387482193696062,
+      "base_seed": 0,
+      "plan_s_median": 0.29026824599998235,
+      "episode_s": 3.680286596999963
+    },
+    {
+      "task": "normal_into_slot",
+      "group": "normal",
+      "mode": "safety",
+      "safety": true,
+      "fallback": "hold",
+      "outcome": "success",
+      "steps": 42,
+      "cycles": 5,
+      "max_true_tilt_deg": 0.0,
+      "contact_steps_tilt_gt_0": 0,
+      "disturbed_ge_10deg": false,
+      "all_rejected_cycles": 0,
+      "reason_counts": {
+        "reduce": 4,
+        "no_reducing_edge": 1,
+        "hold_rejected_escape": 0,
+        "all_rejected": 0,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": null,
+      "final_dist_pinch_cm": 0.5500671572974914,
+      "final_dist_green_cm": 0.42888521525463524,
+      "green_within_tolerance_at_end": true,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 0.3117050439513602,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          0.0,
+          0.19
+        ],
+        "green_achieved_m": [
+          0.4230586793991847,
+          0.0006338780381032423,
+          0.18598774663622986
+        ],
+        "pose_error_mm": 4.502077753373922,
+        "pinch_m": [
+          0.42286451410511416,
+          0.0010799489745987175,
+          0.1947904373528999
+        ],
+        "steps": 176,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            144
+          ],
+          "DESCEND_START": [
+            144,
+            156
+          ],
+          "SETTLE_START": [
+            156,
+            176
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.9404278389953395
+      },
+      "goal_green_m": [
+        0.425,
+        0.0,
+        0.155
+      ],
+      "pinch_goal_m": [
+        0.42478497643388435,
+        0.0004436060702700826,
+        0.16333127305936146
+      ],
+      "start_goal_distance_cm": 3.5000000000000004,
+      "base_seed": 1,
+      "plan_s_median": 0.2907148790000065,
+      "episode_s": 2.9159518590000175
+    },
+    {
+      "task": "slot_exit_right",
+      "group": "slot",
+      "mode": "safety",
+      "safety": true,
+      "fallback": "hold",
+      "outcome": "success",
+      "steps": 74,
+      "cycles": 9,
+      "max_true_tilt_deg": 7.447800377735831,
+      "contact_steps_tilt_gt_0": 42,
+      "disturbed_ge_10deg": false,
+      "all_rejected_cycles": 0,
+      "reason_counts": {
+        "reduce": 9,
+        "no_reducing_edge": 0,
+        "hold_rejected_escape": 0,
+        "all_rejected": 0,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": null,
+      "final_dist_pinch_cm": 0.3197368607502459,
+      "final_dist_green_cm": 0.39749673864547025,
+      "green_within_tolerance_at_end": true,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 0.3197368607502459,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          0.0,
+          0.125
+        ],
+        "green_achieved_m": [
+          0.4226506963416053,
+          0.0007490456712643676,
+          0.12063055346021458
+        ],
+        "pose_error_mm": 5.017206410048266,
+        "pinch_m": [
+          0.4225127164174683,
+          0.0011964912548285184,
+          0.1299464732875801
+        ],
+        "steps": 219,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            144
+          ],
+          "DESCEND_START": [
+            144,
+            199
+          ],
+          "SETTLE_START": [
+            199,
+            219
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.930695417454368
+      },
+      "goal_green_m": [
+        0.445,
+        0.03,
+        0.17
+      ],
+      "pinch_goal_m": [
+        0.44478497643388437,
+        0.030443606070270083,
+        0.17833127305936147
+      ],
+      "start_goal_distance_cm": 5.766281297335399,
+      "base_seed": 2,
+      "plan_s_median": 0.2963638179999748,
+      "episode_s": 4.632074062000015
+    },
+    {
+      "task": "outer_left_in",
+      "group": "outer_left",
+      "mode": "safety",
+      "safety": true,
+      "fallback": "hold",
+      "outcome": "toppled",
+      "steps": 63,
+      "cycles": 8,
+      "max_true_tilt_deg": 36.50089499234636,
+      "contact_steps_tilt_gt_0": 56,
+      "disturbed_ge_10deg": true,
+      "all_rejected_cycles": 0,
+      "reason_counts": {
+        "reduce": 8,
+        "no_reducing_edge": 0,
+        "hold_rejected_escape": 0,
+        "all_rejected": 0,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": "scene episode_failed latch (substep); first control step over 30 deg: 63",
+      "final_dist_pinch_cm": 3.6347398589629667,
+      "final_dist_green_cm": 3.769821851752803,
+      "green_within_tolerance_at_end": false,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 3.6347398589629667,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          -0.0975,
+          0.125
+        ],
+        "green_achieved_m": [
+          0.4228294214064204,
+          -0.09625405544278201,
+          0.12004597097154114
+        ],
+        "pose_error_mm": 5.5503326824056405,
+        "pinch_m": [
+          0.4227193685527865,
+          -0.09582581352536713,
+          0.12980102164541
+        ],
+        "steps": 252,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            177
+          ],
+          "DESCEND_START": [
+            177,
+            232
+          ],
+          "SETTLE_START": [
+            232,
+            252
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.63049571464531
+      },
+      "goal_green_m": [
+        0.425,
+        -0.02,
+        0.17
+      ],
+      "pinch_goal_m": [
+        0.42478497643388435,
+        -0.019556393929729916,
+        0.17833127305936147
+      ],
+      "start_goal_distance_cm": 8.961724164467462,
+      "base_seed": 3,
+      "plan_s_median": 0.30246360950002327,
+      "episode_s": 4.448427195000022
+    },
+    {
+      "task": "outer_right_in",
+      "group": "outer_right",
+      "mode": "safety",
+      "safety": true,
+      "fallback": "hold",
+      "outcome": "toppled",
+      "steps": 65,
+      "cycles": 8,
+      "max_true_tilt_deg": 36.27852681106225,
+      "contact_steps_tilt_gt_0": 51,
+      "disturbed_ge_10deg": true,
+      "all_rejected_cycles": 1,
+      "reason_counts": {
+        "reduce": 7,
+        "no_reducing_edge": 0,
+        "hold_rejected_escape": 0,
+        "all_rejected": 1,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": "scene episode_failed latch (substep); first control step over 30 deg: 65",
+      "final_dist_pinch_cm": 4.720456079039127,
+      "final_dist_green_cm": 4.836657759592508,
+      "green_within_tolerance_at_end": false,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 4.7181358283117625,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          0.0975,
+          0.125
+        ],
+        "green_achieved_m": [
+          0.4223719139809248,
+          0.0976853173684759,
+          0.11979396364470185
+        ],
+        "pose_error_mm": 5.834723059700732,
+        "pinch_m": [
+          0.4223894137687676,
+          0.0981498776911953,
+          0.12979846544338186
+        ],
+        "steps": 252,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            177
+          ],
+          "DESCEND_START": [
+            177,
+            232
+          ],
+          "SETTLE_START": [
+            232,
+            252
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.775768345152357
+      },
+      "goal_green_m": [
+        0.425,
+        0.02,
+        0.17
+      ],
+      "pinch_goal_m": [
+        0.42478497643388435,
+        0.020443606070270084,
+        0.17833127305936147
+      ],
+      "start_goal_distance_cm": 8.961724164467462,
+      "base_seed": 4,
+      "plan_s_median": 0.298581616999968,
+      "episode_s": 4.226880621999953
+    },
+    {
+      "task": "outer_right_cross",
+      "group": "outer_right",
+      "mode": "safety",
+      "safety": true,
+      "fallback": "hold",
+      "outcome": "timeout",
+      "steps": 800,
+      "cycles": 100,
+      "max_true_tilt_deg": 21.010419340477807,
+      "contact_steps_tilt_gt_0": 792,
+      "disturbed_ge_10deg": true,
+      "all_rejected_cycles": 93,
+      "reason_counts": {
+        "reduce": 5,
+        "no_reducing_edge": 1,
+        "hold_rejected_escape": 1,
+        "all_rejected": 93,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": null,
+      "final_dist_pinch_cm": 9.833866876127837,
+      "final_dist_green_cm": 9.989028378232554,
+      "green_within_tolerance_at_end": false,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 9.590072910190269,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          0.0975,
+          0.13
+        ],
+        "green_achieved_m": [
+          0.42241633235452586,
+          0.09768312933564785,
+          0.12484986109975153
+        ],
+        "pose_error_mm": 5.7647901564321655,
+        "pinch_m": [
+          0.42241602175641035,
+          0.09814758800264983,
+          0.1347853022304403
+        ],
+        "steps": 247,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            177
+          ],
+          "DESCEND_START": [
+            177,
+            227
+          ],
+          "SETTLE_START": [
+            227,
+            247
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.775307489306202
+      },
+      "goal_green_m": [
+        0.41,
+        -0.03,
+        0.16
+      ],
+      "pinch_goal_m": [
+        0.40978497643388434,
+        -0.029556393929729915,
+        0.16833127305936146
+      ],
+      "start_goal_distance_cm": 13.183796873435211,
+      "base_seed": 5,
+      "plan_s_median": 0.29577708899998356,
+      "episode_s": 39.621506626999974
+    },
+    {
+      "task": "normal_free",
+      "group": "normal",
+      "mode": "nosafety",
+      "safety": false,
+      "fallback": "hold",
+      "outcome": "success",
+      "steps": 50,
+      "cycles": 6,
+      "max_true_tilt_deg": 0.0,
+      "contact_steps_tilt_gt_0": 0,
+      "disturbed_ge_10deg": false,
+      "all_rejected_cycles": 0,
+      "reason_counts": {
+        "reduce": 5,
+        "no_reducing_edge": 1,
+        "hold_rejected_escape": 0,
+        "all_rejected": 0,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": null,
+      "final_dist_pinch_cm": 0.437435280590706,
+      "final_dist_green_cm": 0.3828058919398862,
+      "green_within_tolerance_at_end": true,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 0.3887998669831961,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          0.0,
+          0.185
+        ],
+        "green_achieved_m": [
+          0.42303856345189517,
+          0.0006439540322560035,
+          0.18107592019004262
+        ],
+        "pose_error_mm": 4.433995092782044,
+        "pinch_m": [
+          0.4228349695004526,
+          0.0010897369840858957,
+          0.1898004883631332
+        ],
+        "steps": 170,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            144
+          ],
+          "DESCEND_START": [
+            144,
+            150
+          ],
+          "SETTLE_START": [
+            150,
+            170
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.939500487804713
+      },
+      "goal_green_m": [
+        0.455,
+        0.025,
+        0.165
+      ],
+      "pinch_goal_m": [
+        0.4547849764338844,
+        0.025443606070270085,
+        0.17333127305936147
+      ],
+      "start_goal_distance_cm": 4.387482193696062,
+      "base_seed": 0,
+      "plan_s_median": 0.3024730544999841,
+      "episode_s": 3.2958636380000144
+    },
+    {
+      "task": "normal_into_slot",
+      "group": "normal",
+      "mode": "nosafety",
+      "safety": false,
+      "fallback": "hold",
+      "outcome": "success",
+      "steps": 42,
+      "cycles": 5,
+      "max_true_tilt_deg": 0.0,
+      "contact_steps_tilt_gt_0": 0,
+      "disturbed_ge_10deg": false,
+      "all_rejected_cycles": 0,
+      "reason_counts": {
+        "reduce": 4,
+        "no_reducing_edge": 1,
+        "hold_rejected_escape": 0,
+        "all_rejected": 0,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": null,
+      "final_dist_pinch_cm": 0.5500671572974914,
+      "final_dist_green_cm": 0.42888521525463524,
+      "green_within_tolerance_at_end": true,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 0.3117050439513602,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          0.0,
+          0.19
+        ],
+        "green_achieved_m": [
+          0.4230586793991847,
+          0.0006338780381032423,
+          0.18598774663622986
+        ],
+        "pose_error_mm": 4.502077753373922,
+        "pinch_m": [
+          0.42286451410511416,
+          0.0010799489745987175,
+          0.1947904373528999
+        ],
+        "steps": 176,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            144
+          ],
+          "DESCEND_START": [
+            144,
+            156
+          ],
+          "SETTLE_START": [
+            156,
+            176
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.9404278389953395
+      },
+      "goal_green_m": [
+        0.425,
+        0.0,
+        0.155
+      ],
+      "pinch_goal_m": [
+        0.42478497643388435,
+        0.0004436060702700826,
+        0.16333127305936146
+      ],
+      "start_goal_distance_cm": 3.5000000000000004,
+      "base_seed": 1,
+      "plan_s_median": 0.2832618450000268,
+      "episode_s": 2.8102823689999923
+    },
+    {
+      "task": "slot_exit_right",
+      "group": "slot",
+      "mode": "nosafety",
+      "safety": false,
+      "fallback": "hold",
+      "outcome": "success",
+      "steps": 74,
+      "cycles": 9,
+      "max_true_tilt_deg": 7.447800377735831,
+      "contact_steps_tilt_gt_0": 42,
+      "disturbed_ge_10deg": false,
+      "all_rejected_cycles": 0,
+      "reason_counts": {
+        "reduce": 9,
+        "no_reducing_edge": 0,
+        "hold_rejected_escape": 0,
+        "all_rejected": 0,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": null,
+      "final_dist_pinch_cm": 0.3197368607502459,
+      "final_dist_green_cm": 0.39749673864547025,
+      "green_within_tolerance_at_end": true,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 0.3197368607502459,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          0.0,
+          0.125
+        ],
+        "green_achieved_m": [
+          0.4226506963416053,
+          0.0007490456712643676,
+          0.12063055346021458
+        ],
+        "pose_error_mm": 5.017206410048266,
+        "pinch_m": [
+          0.4225127164174683,
+          0.0011964912548285184,
+          0.1299464732875801
+        ],
+        "steps": 219,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            144
+          ],
+          "DESCEND_START": [
+            144,
+            199
+          ],
+          "SETTLE_START": [
+            199,
+            219
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.930695417454368
+      },
+      "goal_green_m": [
+        0.445,
+        0.03,
+        0.17
+      ],
+      "pinch_goal_m": [
+        0.44478497643388437,
+        0.030443606070270083,
+        0.17833127305936147
+      ],
+      "start_goal_distance_cm": 5.766281297335399,
+      "base_seed": 2,
+      "plan_s_median": 0.3049614580000366,
+      "episode_s": 4.670921158999988
+    },
+    {
+      "task": "outer_left_in",
+      "group": "outer_left",
+      "mode": "nosafety",
+      "safety": false,
+      "fallback": "hold",
+      "outcome": "toppled",
+      "steps": 49,
+      "cycles": 6,
+      "max_true_tilt_deg": 31.811832087163005,
+      "contact_steps_tilt_gt_0": 42,
+      "disturbed_ge_10deg": true,
+      "all_rejected_cycles": 0,
+      "reason_counts": {
+        "reduce": 6,
+        "no_reducing_edge": 0,
+        "hold_rejected_escape": 0,
+        "all_rejected": 0,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": "scene episode_failed latch (substep); first control step over 30 deg: 49",
+      "final_dist_pinch_cm": 4.689640782550071,
+      "final_dist_green_cm": 4.837939166367454,
+      "green_within_tolerance_at_end": false,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 4.689640782550071,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          -0.0975,
+          0.125
+        ],
+        "green_achieved_m": [
+          0.4228294214064204,
+          -0.09625405544278201,
+          0.12004597097154114
+        ],
+        "pose_error_mm": 5.5503326824056405,
+        "pinch_m": [
+          0.4227193685527865,
+          -0.09582581352536713,
+          0.12980102164541
+        ],
+        "steps": 252,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            177
+          ],
+          "DESCEND_START": [
+            177,
+            232
+          ],
+          "SETTLE_START": [
+            232,
+            252
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.63049571464531
+      },
+      "goal_green_m": [
+        0.425,
+        -0.02,
+        0.17
+      ],
+      "pinch_goal_m": [
+        0.42478497643388435,
+        -0.019556393929729916,
+        0.17833127305936147
+      ],
+      "start_goal_distance_cm": 8.961724164467462,
+      "base_seed": 3,
+      "plan_s_median": 0.2989558044999683,
+      "episode_s": 3.5829563190000044
+    },
+    {
+      "task": "outer_right_in",
+      "group": "outer_right",
+      "mode": "nosafety",
+      "safety": false,
+      "fallback": "hold",
+      "outcome": "toppled",
+      "steps": 61,
+      "cycles": 8,
+      "max_true_tilt_deg": 31.98355640633421,
+      "contact_steps_tilt_gt_0": 47,
+      "disturbed_ge_10deg": true,
+      "all_rejected_cycles": 0,
+      "reason_counts": {
+        "reduce": 8,
+        "no_reducing_edge": 0,
+        "hold_rejected_escape": 0,
+        "all_rejected": 0,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": "scene episode_failed latch (substep); first control step over 30 deg: 61",
+      "final_dist_pinch_cm": 3.790102630073201,
+      "final_dist_green_cm": 3.9336786061476823,
+      "green_within_tolerance_at_end": false,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 3.790102630073201,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          0.0975,
+          0.125
+        ],
+        "green_achieved_m": [
+          0.4223719139809248,
+          0.0976853173684759,
+          0.11979396364470185
+        ],
+        "pose_error_mm": 5.834723059700732,
+        "pinch_m": [
+          0.4223894137687676,
+          0.0981498776911953,
+          0.12979846544338186
+        ],
+        "steps": 252,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            177
+          ],
+          "DESCEND_START": [
+            177,
+            232
+          ],
+          "SETTLE_START": [
+            232,
+            252
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.775768345152357
+      },
+      "goal_green_m": [
+        0.425,
+        0.02,
+        0.17
+      ],
+      "pinch_goal_m": [
+        0.42478497643388435,
+        0.020443606070270084,
+        0.17833127305936147
+      ],
+      "start_goal_distance_cm": 8.961724164467462,
+      "base_seed": 4,
+      "plan_s_median": 0.3116979604999983,
+      "episode_s": 4.332560719000014
+    },
+    {
+      "task": "outer_right_cross",
+      "group": "outer_right",
+      "mode": "nosafety",
+      "safety": false,
+      "fallback": "hold",
+      "outcome": "toppled",
+      "steps": 46,
+      "cycles": 6,
+      "max_true_tilt_deg": 35.40855938916447,
+      "contact_steps_tilt_gt_0": 38,
+      "disturbed_ge_10deg": true,
+      "all_rejected_cycles": 0,
+      "reason_counts": {
+        "reduce": 6,
+        "no_reducing_edge": 0,
+        "hold_rejected_escape": 0,
+        "all_rejected": 0,
+        "all_rejected_retreat": 0
+      },
+      "toppled_rule": "scene episode_failed latch (substep); first control step over 30 deg: 46",
+      "final_dist_pinch_cm": 9.066716549403122,
+      "final_dist_green_cm": 9.131810588683367,
+      "green_within_tolerance_at_end": false,
+      "geometric_false_arrival": false,
+      "min_dist_pinch_cm": 9.066716549403122,
+      "start": {
+        "grip_offset_m": [
+          -0.00021502356611563522,
+          0.0004436060702700826,
+          0.00833127305936146
+        ],
+        "green_requested_m": [
+          0.425,
+          0.0975,
+          0.13
+        ],
+        "green_achieved_m": [
+          0.42241633235452586,
+          0.09768312933564785,
+          0.12484986109975153
+        ],
+        "pose_error_mm": 5.7647901564321655,
+        "pinch_m": [
+          0.42241602175641035,
+          0.09814758800264983,
+          0.1347853022304403
+        ],
+        "steps": 247,
+        "max_tilt_deg": 0.0,
+        "phase_bounds": {
+          "SETTLE": [
+            0,
+            20
+          ],
+          "APPROACH": [
+            20,
+            42
+          ],
+          "DESCEND": [
+            42,
+            87
+          ],
+          "CLOSE": [
+            87,
+            94
+          ],
+          "LIFT": [
+            94,
+            143
+          ],
+          "CARRY": [
+            143,
+            177
+          ],
+          "DESCEND_START": [
+            177,
+            227
+          ],
+          "SETTLE_START": [
+            227,
+            247
+          ]
+        },
+        "grasped": true,
+        "nearest_guard_cm": 4.775307489306202
+      },
+      "goal_green_m": [
+        0.41,
+        -0.03,
+        0.16
+      ],
+      "pinch_goal_m": [
+        0.40978497643388434,
+        -0.029556393929729915,
+        0.16833127305936146
+      ],
+      "start_goal_distance_cm": 13.183796873435211,
+      "base_seed": 5,
+      "plan_s_median": 0.30760200950001604,
+      "episode_s": 3.467394194999997
+    }
+  ],
+  "table": "task               | mode     | outcome    | steps | max true tilt | tilt>0 steps | all-rejected cycles\n------------------------------------------------------------------------------------------------\nnormal_free        | safety   | success    |    50 |           0.0 |            0 | 0\nnormal_into_slot   | safety   | success    |    42 |           0.0 |            0 | 0\nslot_exit_right    | safety   | success    |    74 |           7.4 |           42 | 0\nouter_left_in      | safety   | toppled    |    63 |          36.5 |           56 | 0\nouter_right_in     | safety   | toppled    |    65 |          36.3 |           51 | 1\nouter_right_cross  | safety   | timeout    |   800 |          21.0 |          792 | 93\nnormal_free        | nosafety | success    |    50 |           0.0 |            0 | 0\nnormal_into_slot   | nosafety | success    |    42 |           0.0 |            0 | 0\nslot_exit_right    | nosafety | success    |    74 |           7.4 |           42 | 0\nouter_left_in      | nosafety | toppled    |    49 |          31.8 |           42 | 0\nouter_right_in     | nosafety | toppled    |    61 |          32.0 |           47 | 0\nouter_right_cross  | nosafety | toppled    |    46 |          35.4 |           38 | 0",
+  "comparison": "task               | with safety check              | without (--no-safety)\n--------------------------------------------------------------------------------\nnormal_free        | success (50 steps, 0.0 deg)    | success (50 steps, 0.0 deg)\nnormal_into_slot   | success (42 steps, 0.0 deg)    | success (42 steps, 0.0 deg)\nslot_exit_right    | success (74 steps, 7.4 deg)    | success (74 steps, 7.4 deg)\nouter_left_in      | toppled (63 steps, 36.5 deg)   | toppled (49 steps, 31.8 deg)\nouter_right_in     | toppled (65 steps, 36.3 deg)   | toppled (61 steps, 32.0 deg)\nouter_right_cross  | timeout (800 steps, 21.0 deg)  | toppled (46 steps, 35.4 deg)",
+  "verdict": "with the model's safety check: 3 success / 2 toppled / 1 timeout / 0 lost_grasp; without it: 3 success / 3 toppled / 0 timeout / 0 lost_grasp (over 6 tasks; safety from the model, progress geometric, no RRT tree / goal head)"
+}

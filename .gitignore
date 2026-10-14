@@ -1,3 +1,10 @@
 __pycache__/
 *.pyc
 env_demo_out/
+env_demo_out_*/
+task_demo_out*/
+# created inside the repository by the Quick start; never part of the release
+.venv/
+le-wm/
+# project-internal report (Chinese), removed from the public repository on 2026-10-08; kept out of SHA256SUMS too
+provenance/compare_wm_physical_s1_001_REPORT_ZH.md
